@@ -67,7 +67,7 @@ class _AnimatedTextPageState extends State<AnimatedTextPage> {
                       fontSize: 90,
                       fontFamily: 'DancingScript',
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     textAlign: TextAlign.center, // Center-align the text
                   ),
