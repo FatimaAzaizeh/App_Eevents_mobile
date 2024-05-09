@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:testtapp/Color.dart';
+import 'package:testtapp/screens/Home_screen.dart';
 
 class LoginSignupScreen extends StatefulWidget {
   static const String screenRoute = 'login_signup';
@@ -27,7 +28,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
   void _authenticateUser() async {
     try {
-      if (isSignupScreen) {
+      /* if (isSignupScreen) {
         final newUser = await _auth.createUserWithEmailAndPassword(
           email: emailSingUpController.text.trim(),
           password: passwordSingUpController.text,
@@ -47,22 +48,21 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           );
           newCurrentUser.addToFirestore();*/
         }
+          */
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+      // } else {
+      // Sign in logic
+      final user = await _auth.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => HomeScreen()));
 
-        /* Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );*/
-      } else {
-        // Sign in logic
-        final user = await _auth.signInWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text,
-        );
-        /*  Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );*/
-      }
+      /// }
     } catch (e) {
       print('Authentication Error: $e');
       // Handle authentication errors (e.g., show error message)

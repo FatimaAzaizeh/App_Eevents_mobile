@@ -7,3 +7,22 @@ class Palette {
   static const Color textColor2 = Color.fromARGB(255, 106, 124, 134);
   static const Color googelColor = Color(0xFFDE4B39);
 }
+
+//"The main color of the app."
+//Purple
+const ColorPurple_100 = Color.fromARGB(255, 189, 140, 177);
+Color ColorPurple_70 = Color.fromARGB(255, 189, 140, 177).withOpacity(0.7);
+Color ColorPurple_50 = Color.fromARGB(255, 189, 140, 177).withOpacity(0.5);
+Color ColorPurple_20 = Color.fromARGB(255, 189, 140, 177).withOpacity(0.2);
+
+//Pink
+const ColorPink_100 = Color.fromARGB(255, 214, 170, 173);
+Color ColorPink_70 = Color.fromARGB(255, 214, 170, 173).withOpacity(0.7);
+Color ColorPink_50 = Color.fromARGB(255, 214, 170, 173).withOpacity(0.5);
+Color ColorPink_20 = Color.fromARGB(255, 214, 170, 173).withOpacity(0.2);
+
+//Cream
+const ColorCream_100 = Color.fromARGB(255, 225, 189, 158);
+Color ColorCream_70 = Color.fromARGB(255, 225, 189, 158).withOpacity(0.7);
+Color ColorCream_50 = Color.fromARGB(255, 225, 189, 158).withOpacity(0.5);
+Color ColorCream_20 = Color.fromARGB(255, 225, 189, 158).withOpacity(0.2);
