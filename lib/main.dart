@@ -9,6 +9,7 @@ import 'package:testtapp/firebase_options.dart';
 
 import 'package:testtapp/screens/AnimatedTextPage.dart';
 import 'package:testtapp/screens/Home_screen.dart';
+import 'package:testtapp/screens/Service_screen.dart';
 
 import 'package:testtapp/screens/login_signup.dart';
 
@@ -54,6 +55,7 @@ class MyApp extends StatelessWidget {
             AnimatedTextPage.screenRoute: (context) => AnimatedTextPage(),
             LoginSignupScreen.screenRoute: (context) => LoginSignupScreen(),
             HomeScreen.screenRoute: (context) => HomeScreen(),
+            Service.screenRoute: (context) => Service(),
           },
           home: AnimatedTextPage(),
         ));

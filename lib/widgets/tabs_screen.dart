@@ -1,6 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:testtapp/Color.dart';
+import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
 
 class TabsScreen extends StatefulWidget {
@@ -13,24 +13,28 @@ class TabsScreen extends StatefulWidget {
 }
 
 class _TabsScreenState extends State<TabsScreen> {
+  int _selectedScreenIndex = 0;
+  late Map<String, Widget> _screens = {
+    'الخدمات': Service(),
+    'الرئيسية': Placeholder()
+  };
+
   void _selectScreen(int index) {
+    print("Index selected: $index");
     setState(() {
       _selectedScreenIndex = index;
     });
   }
 
-  int _selectedScreenIndex = 0;
-  late List<Map<String, Object>> _screens;
-
-  @override
   @override
   Widget build(BuildContext context) {
+    print("Selected index: $_selectedScreenIndex");
     return Scaffold(
       appBar: AppBar(
-        title: Text(_screens[_selectedScreenIndex]['Title'] as String),
+        title: Text(_screens.keys.elementAt(_selectedScreenIndex)),
       ),
       drawer: AppDrawer(),
-      body: _screens[_selectedScreenIndex]['Screen'] as Widget,
+      body: _screens.values.elementAt(_selectedScreenIndex),
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectScreen,
         backgroundColor: ColorPink_100,
@@ -41,11 +45,11 @@ class _TabsScreenState extends State<TabsScreen> {
           BottomNavigationBarItem(
             backgroundColor: ColorPink_100,
             icon: Icon(Icons.dashboard),
-            label: 'التصنيفات',
+            label: 'الخدمات',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
-            label: 'المفضلة',
+            label: 'الرئيسية',
           ),
         ],
       ),

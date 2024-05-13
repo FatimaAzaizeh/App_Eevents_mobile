@@ -7,6 +7,50 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:394890785815:android:4b1a75d0ae62f350a8d852",
+        "android_client_info": {
+          "package_name": "com.example.mobileapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "394890785815-ekesaalp2v230m4d538gfuej4a6ncqke.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mobileapp",
+            "certificate_hash": "73606b07a809544bc681184f3a36e5e7a429c937"
+          }
+        },
+        {
+          "client_id": "394890785815-7ghehc7p2u5tq0ds2epo6i1feoq79aua.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW2To7lqwmTpnQYh689G9U70fx8C5BCUs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "394890785815-7ghehc7p2u5tq0ds2epo6i1feoq79aua.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "394890785815-cka3sg4kjl57onul2odcnf8tfk6ubsr1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mobileapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:394890785815:android:19dae1407ced3f2ba8d852",
         "android_client_info": {
           "package_name": "com.example.testtappEvents"
@@ -37,6 +81,13 @@
             {
               "client_id": "394890785815-7ghehc7p2u5tq0ds2epo6i1feoq79aua.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "394890785815-cka3sg4kjl57onul2odcnf8tfk6ubsr1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mobileapp"
+              }
             }
           ]
         }

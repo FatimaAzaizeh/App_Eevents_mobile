@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -67,19 +64,30 @@ class DefaultFirebaseOptions {
     messagingSenderId: '394890785815',
     projectId: 'eeventsapp-183f1',
     storageBucket: 'eeventsapp-183f1.appspot.com',
-    androidClientId: '394890785815-o4mfhgatud98k79uprv5irl5td9f1iq7.apps.googleusercontent.com',
+    androidClientId: '394890785815-1tis5ae0i9qt2g55qdat14p5bao4v1j1.apps.googleusercontent.com',
     iosClientId: '394890785815-infbvmu27bo4oorlefngherm11k4a9i0.apps.googleusercontent.com',
     iosBundleId: 'com.example.testtapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCHojQu4gD9MdYfvoMFp9YvRbWaJAcr0pk',
-    appId: '1:394890785815:ios:f355ee83ee7373aaa8d852',
+    appId: '1:394890785815:ios:9e6961c01db955cfa8d852',
     messagingSenderId: '394890785815',
     projectId: 'eeventsapp-183f1',
     storageBucket: 'eeventsapp-183f1.appspot.com',
-    androidClientId: '394890785815-o4mfhgatud98k79uprv5irl5td9f1iq7.apps.googleusercontent.com',
-    iosClientId: '394890785815-g57624lvd4hnvhkblu8b535oa1t1avv6.apps.googleusercontent.com',
-    iosBundleId: 'com.example.testtapp.RunnerTests',
+    androidClientId: '394890785815-1tis5ae0i9qt2g55qdat14p5bao4v1j1.apps.googleusercontent.com',
+    iosClientId: '394890785815-infbvmu27bo4oorlefngherm11k4a9i0.apps.googleusercontent.com',
+    iosBundleId: 'com.example.testtapp',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAltiKg2jw46nTkQSYA09FGIzDq9KaF-yQ',
+    appId: '1:394890785815:web:b0ae92da97d908dca8d852',
+    messagingSenderId: '394890785815',
+    projectId: 'eeventsapp-183f1',
+    authDomain: 'eeventsapp-183f1.firebaseapp.com',
+    storageBucket: 'eeventsapp-183f1.appspot.com',
+    measurementId: 'G-HG0R7BDP97',
+  );
+
 }

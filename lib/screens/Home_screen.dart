@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(),
       drawer: AppDrawer(),
+      body: Service(),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).primaryColor,
         selectedItemColor: Theme.of(context).hintColor,
@@ -22,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
-            label: 'التصنيفات',
+            label: 'الخدمات',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
