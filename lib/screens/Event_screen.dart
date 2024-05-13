@@ -1,4 +1,4 @@
-/*import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:testtapp/widgets/Event_item.dart';
 
@@ -8,10 +8,10 @@ class EventScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Material(
-        child: StreamBuilder<QuerySnapshot>(
+      child: Scaffold(
+        body: StreamBuilder<QuerySnapshot>(
           stream:
-              FirebaseFirestore.instance.collection('EventType').snapshots(),
+              FirebaseFirestore.instance.collection('event_types').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -31,10 +31,12 @@ class EventScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final doc = eventDocs[index];
                   return EventItemDisplay(
-                    title: doc['Name'].toString(),
-                    imageUrl: doc['imageUrl'].toString(),
+                    title: doc['name'].toString(),
+                    imageUrl: doc['image_url'].toString(),
                     id: doc.id,
-                    onTapFunction: () {},
+                    onTapFunction: () {
+                      //  getDataById(doc.id);
+                    },
                   );
                 },
               );
@@ -45,4 +47,3 @@ class EventScreen extends StatelessWidget {
     );
   }
 }
-*/

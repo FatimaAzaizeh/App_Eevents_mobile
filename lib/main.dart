@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:testtapp/firebase_options.dart';
 
 import 'package:testtapp/screens/AnimatedTextPage.dart';
+import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 
@@ -30,34 +31,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => null //Data to be passed to all pages.//
-        ,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: [
-            const Locale("ar"), // Arabic
-            const Locale("en"), // English (fallback)
-          ],
-          locale: const Locale('ar'), // Set Arabic as the default locale
-          // Set text direction to RTL
-          builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: child!,
-            );
-          },
-          routes: {
-            AnimatedTextPage.screenRoute: (context) => AnimatedTextPage(),
-            LoginSignupScreen.screenRoute: (context) => LoginSignupScreen(),
-            HomeScreen.screenRoute: (context) => HomeScreen(),
-            Service.screenRoute: (context) => Service(),
-          },
-          home: AnimatedTextPage(),
-        ));
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale("ar"), // Arabic
+        const Locale("en"), // English (fallback)
+      ],
+      locale: const Locale('ar'), // Set Arabic as the default locale
+      // Set text direction to RTL
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        );
+      },
+      routes: {
+        AnimatedTextPage.screenRoute: (context) => AnimatedTextPage(),
+        LoginSignupScreen.screenRoute: (context) => LoginSignupScreen(),
+        HomeScreen.screenRoute: (context) => HomeScreen(),
+        Service.screenRoute: (context) => Service(),
+        EventScreen.screenRoute: (context) => EventScreen(),
+      },
+      home: AnimatedTextPage(),
+    );
   }
 }

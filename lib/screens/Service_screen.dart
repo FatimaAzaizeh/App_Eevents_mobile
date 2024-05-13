@@ -29,10 +29,10 @@ class _ServiceState extends State<Service> {
               } else {
                 final eventDocs = snapshot.data!.docs;
                 return GridView.builder(
-                  padding: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(4),
                   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent:
-                        150, // Adjust according to your requirement
+                        191, // Adjust according to your requirement
                     childAspectRatio: 1, // Ensure each item is square
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,

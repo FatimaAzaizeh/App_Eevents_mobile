@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-class ServiceItem extends StatelessWidget {
-  const ServiceItem({
+class EventItemDisplay extends StatelessWidget {
+  const EventItemDisplay({
     Key? key,
     required this.id,
+    required this.title,
     required this.imageUrl,
     required this.onTapFunction,
   }) : super(key: key);
 
   final String id;
+  final String title;
   final String imageUrl;
   final Function onTapFunction;
 
@@ -40,9 +42,18 @@ class ServiceItem extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
+                        color: Colors.black.withOpacity(0.4),
                       ),
-                      padding: EdgeInsets.all(0),
-                      //alignment: Alignment.bottomLeft,
+                      padding: EdgeInsets.all(10),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
