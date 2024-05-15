@@ -181,7 +181,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           buildBottomHalfContainer(false),
           // Bottom buttons
           Positioned(
-            top: MediaQuery.of(context).size.height - 230,
+            top: MediaQuery.of(context).size.height - 100,
             right: 0,
             left: 0,
             child: Column(
@@ -217,21 +217,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Checkbox(
-                    value: isAdmin,
-                    activeColor: Palette.textColor2,
-                    onChanged: (value) {
-                      setState(() {
-                        isAdmin = !isAdmin;
-                      });
-                    },
-                  ),
-                  Text("المسؤول",
-                      style: TextStyle(fontSize: 12, color: Palette.textColor1))
-                ],
-              ),
               TextButton(
                 onPressed: () {},
                 child: Text("نسيت كلمة السر؟",
