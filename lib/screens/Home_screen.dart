@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:testtapp/constants.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Service_screen.dart';
+import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,12 +15,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1; // Initially selected index
+  int _selectedIndex = 1; // Initially selected index for the home icon
 
   static List<Widget> _widgetOptions = <Widget>[
-    Service(), // Your dashboard screen
-    EventScreen(), // Your home screen
-    Container(), // Your cart screen
+    Service(), // Dashboard screen
+    EventScreen(), // Event screen
+    cartScreen(), // Cart screen
   ];
 
   void _onItemTapped(int index) {
@@ -30,9 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
+      drawer: AppDrawer(
+        onItemTapped: (int) {},
+      ),
       appBar: AppBar(
-        backgroundColor: ColorPink_20,
+        backgroundColor: ColorPink_100,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -46,24 +50,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: ColorPink_100,
-        selectedItemColor: Theme.of(context).hintColor,
-        unselectedItemColor: Colors.white,
-        currentIndex: _selectedIndex,
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: ColorPink_20,
+        color: ColorPink_100,
+        animationDuration: Duration(milliseconds: 300),
         onTap: _onItemTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'الخدمات',
+        index: _selectedIndex, // Set the default selected index
+        items: <Widget>[
+          Icon(
+            Icons.dashboard,
+            color: Colors.white,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'الرئيسية',
+          Icon(
+            Icons.home,
+            color: Colors.white,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'السلة ',
+          Icon(
+            Icons.shopping_cart,
+            color: Colors.white,
           ),
         ],
       ),
