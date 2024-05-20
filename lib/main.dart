@@ -11,8 +11,12 @@ import 'package:testtapp/screens/AnimatedTextPage.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/Service_screen.dart';
+import 'package:testtapp/screens/cart_screen.dart';
+import 'package:testtapp/screens/checkout_screen.dart';
 
 import 'package:testtapp/screens/login_signup.dart';
+import 'package:testtapp/screens/order_history.dart';
+import 'package:testtapp/screens/order_status.dart';
 
 final _auth = FirebaseAuth.instance;
 void main() async {
@@ -55,6 +59,10 @@ class MyApp extends StatelessWidget {
         HomeScreen.screenRoute: (context) => HomeScreen(),
         Service.screenRoute: (context) => Service(),
         EventScreen.screenRoute: (context) => EventScreen(),
+        cartScreen.screenRoute: (context) => cartScreen(),
+        orderhistory.screenRoute: (context) => orderhistory(),
+        orderstatus.screenRoute: (context) => orderstatus(),
+        checkoutscreen.screenRoute: (context) => checkoutscreen()
       },
       home: AnimatedTextPage(),
     );
