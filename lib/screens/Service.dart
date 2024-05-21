@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:testtapp/widgets/Item_vendore.dart';
 import 'package:testtapp/widgets/Service.dart';
-import 'package:testtapp/widgets/Service_item.dart';
 
 class DisplayService extends StatelessWidget {
   static const screenRouter = 'Service';
@@ -34,9 +34,7 @@ class DisplayService extends StatelessWidget {
             itemBuilder: (ctx, index) {
               var doc = snapshot.data!.docs[index];
               return GestureDetector(
-                onTap: () {
-                  _removeService(context, doc.id);
-                },
+                onTap: () {},
                 child: service(
                   title: doc['business_name'],
                   imageUrl: doc['logo_url'],
