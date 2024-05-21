@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:testtapp/screens/Service.dart';
 import 'package:testtapp/widgets/Service_item.dart';
 
 class Service extends StatefulWidget {
@@ -44,7 +45,16 @@ class _ServiceState extends State<Service> {
                       imageUrl: doc['image_url'].toString(),
                       id: doc.id,
                       onTapFunction: () {
-                        //  getDataById(doc.id);
+                        DocumentReference ServiceId = FirebaseFirestore.instance
+                            .collection('service_types')
+                            .doc(doc.id);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DisplayService(idService: ServiceId),
+                          ),
+                        );
                       },
                     );
                   },

@@ -10,6 +10,7 @@ import 'package:testtapp/firebase_options.dart';
 import 'package:testtapp/screens/AnimatedTextPage.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
+import 'package:testtapp/screens/Service.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/screens/checkout_screen.dart';
@@ -62,7 +63,7 @@ class MyApp extends StatelessWidget {
         cartScreen.screenRoute: (context) => cartScreen(),
         orderhistory.screenRoute: (context) => orderhistory(),
         orderstatus.screenRoute: (context) => orderstatus(),
-        checkoutscreen.screenRoute: (context) => checkoutscreen()
+        checkoutscreen.screenRoute: (context) => checkoutscreen(),
       },
       home: AnimatedTextPage(),
     );
