@@ -98,8 +98,17 @@ class VendorContainer extends StatelessWidget {
 
   VendorContainer({required this.vendorId, required this.items});
 
+  double calculateTotalPrice() {
+    double totalPrice = 0.0;
+    items.forEach((itemCode, itemData) {
+      totalPrice += itemData['price'] * itemData['amount'];
+    });
+    return totalPrice;
+  }
+
   @override
   Widget build(BuildContext context) {
+    double totalPrice = calculateTotalPrice();
     return Card(
       margin: EdgeInsets.symmetric(vertical: 10),
       child: Padding(
@@ -127,8 +136,12 @@ class VendorContainer extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
+              'Total Price: د.ك $totalPrice',
+              style: TextStyle(color: Colors.green, fontSize: 16),
+            ),
+            Text(
               'رسوم التوصيل: د.ك 0.0', // Replace with actual delivery fee if available
-              style: TextStyle(color: Colors.green),
+              style: TextStyle(color: Colors.green, fontSize: 16),
             ),
           ],
         ),

@@ -7,7 +7,6 @@ class Cart {
   Cart({required this.userId, this.vendors});
 
   // Method to add an item to the cart
-  // Method to add an item to the cart
   void addItem(String vendorId, String itemCode, String itemName,
       String itemImage, double price, int amount) {
     // Initialize vendors if null
@@ -67,8 +66,16 @@ class Cart {
 
   // Method to delete an item from the cart
   void deleteItem(String vendorId, String itemCode) {
-    vendors?.removeWhere(
-        (key, value) => key == vendorId && value.containsKey(itemCode));
+    if (vendors != null &&
+        vendors!.containsKey(vendorId) &&
+        vendors![vendorId]!.containsKey(itemCode)) {
+      vendors![vendorId]!.remove(itemCode);
+      if (vendors![vendorId]!.isEmpty) {
+        vendors!.remove(vendorId);
+      }
+      // Update Firestore document
+      updateFirestore();
+    }
   }
 
   // Method to check if an item exists in the cart
