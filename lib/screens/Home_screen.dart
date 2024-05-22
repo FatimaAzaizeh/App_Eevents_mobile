@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:testtapp/constants.dart';
+import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/screens/cart_screen.dart';
@@ -20,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static List<Widget> _widgetOptions = <Widget>[
     Service(), // Dashboard screen
     EventScreen(), // Event screen
-    cartScreen(), // Cart screen
+    ShoppingCartPage(), // Cart screen
   ];
 
   void _onItemTapped(int index) {

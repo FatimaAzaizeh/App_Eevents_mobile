@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:testtapp/constants.dart';
+import 'package:testtapp/models/Cart.dart';
+import 'package:testtapp/models/User.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 
 class LoginSignupScreen extends StatefulWidget {
@@ -28,7 +30,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
   void _authenticateUser() async {
     try {
-      /* if (isSignupScreen) {
+      if (isSignupScreen) {
         final newUser = await _auth.createUserWithEmailAndPassword(
           email: emailSingUpController.text.trim(),
           password: passwordSingUpController.text,
@@ -37,32 +39,34 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           String? uid =
               newUser.user!.uid; // Access the UID from the created user
 
-          /*  CurrentUser newCurrentUser = CurrentUser(
-            UID: uid,
-            email: emailSingUpController.text.toString(),
-            name: NameController.text.toString(),
-            user_type_id: '2',
-            phone: '',
-            addresss: '',
-            is_active: true,
-          );
-          newCurrentUser.addToFirestore();*/
+          UserDataBase new_user = new UserDataBase(
+              UID: uid,
+              email: emailSingUpController.text,
+              name: NameController.text,
+              user_type_id:
+                  FirebaseFirestore.instance.collection('user_types').doc('2'),
+              phone: '',
+              address: '',
+              isActive: true,
+              imageUrl: '');
+          new_user.saveToDatabase();
         }
-          */
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-      // } else {
-      // Sign in logic
-      final user = await _auth.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-      );
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => HomeScreen()));
-
-      /// }
+        User? user = FirebaseAuth.instance.currentUser;
+        Cart cartItem = Cart(userId: user!.uid, vendors: {});
+        cartItem.uploadToFirebase();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        // Sign in logic
+        final user = await _auth.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text,
+        );
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      }
     } catch (e) {
       print('Authentication Error: $e');
       // Handle authentication errors (e.g., show error message)

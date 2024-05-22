@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:testtapp/firebase_options.dart';
 
 import 'package:testtapp/screens/AnimatedTextPage.dart';
+import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/Service.dart';
