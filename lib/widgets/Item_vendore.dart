@@ -183,10 +183,7 @@ class ServiceCard extends StatelessWidget {
                               price, // Item price
                               1,
                             );
-                            cartItem.editItemAmount(
-                              Vendor_id,
-                              itemId,
-                            );
+                            cartItem.editItemAmount(Vendor_id, itemId);
                           },
                         ),
                       ),

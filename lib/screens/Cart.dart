@@ -62,6 +62,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           return VendorContainer(
                             vendorId: vendorId,
                             items: items,
+                            userId: userId,
                           );
                         },
                       );
@@ -95,8 +96,10 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 class VendorContainer extends StatelessWidget {
   final String vendorId;
   final Map<String, dynamic> items;
+  final String userId;
 
-  VendorContainer({required this.vendorId, required this.items});
+  VendorContainer(
+      {required this.vendorId, required this.items, required this.userId});
 
   double calculateTotalPrice() {
     double totalPrice = 0.0;
@@ -125,6 +128,9 @@ class VendorContainer extends StatelessWidget {
               children: items.entries.map((entry) {
                 final itemData = entry.value as Map<String, dynamic>;
                 return CartItem(
+                  userId: userId,
+                  vendorId: vendorId,
+                  itemCode: entry.key,
                   title: itemData['item_name'],
                   date: 'Description not available',
                   quantity: itemData['amount'],
@@ -151,6 +157,9 @@ class VendorContainer extends StatelessWidget {
 }
 
 class CartItem extends StatelessWidget {
+  final String userId;
+  final String vendorId;
+  final String itemCode;
   final String title;
   final String date;
   final int quantity;
@@ -159,6 +168,9 @@ class CartItem extends StatelessWidget {
   final String imageUrl;
 
   CartItem({
+    required this.userId,
+    required this.vendorId,
+    required this.itemCode,
     required this.title,
     required this.date,
     required this.quantity,
@@ -166,6 +178,14 @@ class CartItem extends StatelessWidget {
     required this.deliveryFee,
     required this.imageUrl,
   });
+
+  void _updateItemAmount(int amount) {
+    FirebaseFirestore.instance.collection('cart').doc(userId).update({
+      'vendors.$vendorId.$itemCode.amount': amount,
+    }).catchError((error) {
+      print('Error updating item amount: $error');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +226,25 @@ class CartItem extends StatelessWidget {
                 SizedBox(height: 8),
                 Text(date),
                 SizedBox(height: 8),
-                Text('كمية: $quantity'),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.remove),
+                      onPressed: () {
+                        if (quantity > 1) {
+                          _updateItemAmount(quantity - 1);
+                        }
+                      },
+                    ),
+                    Text('كمية: $quantity'),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        _updateItemAmount(quantity + 1);
+                      },
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
