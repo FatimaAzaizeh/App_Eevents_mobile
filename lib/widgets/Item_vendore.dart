@@ -168,7 +168,7 @@ class ServiceCard extends StatelessWidget {
     required this.vendorId,
     required this.itemId,
   });
-
+  bool firsttime = true;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -212,15 +212,19 @@ class ServiceCard extends StatelessWidget {
                         child: IconButton(
                           icon: Icon(Icons.add_shopping_cart),
                           onPressed: () {
-                            addToCart(
-                              vendorId,
-                              itemId,
-                              title,
-                              imageUrl,
-                              price,
-                              1,
-                            );
-                            cartItem.editItemAmount(vendorId, itemId);
+                            if (firsttime) {
+                              addToCart(
+                                vendorId,
+                                itemId,
+                                title,
+                                imageUrl,
+                                price,
+                                1,
+                              );
+                              firsttime = false;
+                            } else {
+                              cartItem.editItemAmount(vendorId, itemId);
+                            }
                           },
                         ),
                       ),

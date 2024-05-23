@@ -11,27 +11,35 @@ class OrderHistoryPage extends StatefulWidget {
 }
 
 class _OrderHistoryPageState extends State<OrderHistoryPage> {
-  Future<List<Orders>> _fetchOrders(String userId) async {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  late Stream<User?> _userStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _userStream = FirebaseAuth.instance.authStateChanges();
+  }
+
+  Stream<List<Orders>> _fetchOrders(String userId) {
+    return FirebaseFirestore.instance
         .collection('orders')
         .where('user_id', isEqualTo: userId)
-        .get();
-
-    return querySnapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return Orders(
-        orderId: data['order_id'],
-        userId: data['user_id'],
-        vendors: (data['vendors'] as Map<String, dynamic>).map((key, value) {
-          return MapEntry(
-            key,
-            value as Map<String, dynamic>,
-          );
-        }),
-        totalPrice: data['total_price'],
-        totalItems: data['total_items'],
-      );
-    }).toList();
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return Orders(
+                orderId: data['order_id'],
+                userId: data['user_id'],
+                vendors:
+                    (data['vendors'] as Map<String, dynamic>).map((key, value) {
+                  return MapEntry(
+                    key,
+                    value as Map<String, dynamic>,
+                  );
+                }),
+                totalPrice: data['total_price'],
+                totalItems: data['total_items'],
+              );
+            }).toList());
   }
 
   Future<String> _fetchItemImage(String itemCode) async {
@@ -55,26 +63,26 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
       appBar: AppBar(
         title: Text('Order History'),
       ),
-      body: FutureBuilder<User?>(
-        future: FirebaseAuth.instance.authStateChanges().first,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: StreamBuilder<User?>(
+        stream: _userStream,
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData) {
+          if (!userSnapshot.hasData || userSnapshot.data == null) {
             return Center(child: Text('User not logged in'));
           }
-          final userId = snapshot.data!.uid;
-          return FutureBuilder<List<Orders>>(
-            future: _fetchOrders(userId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+          final userId = userSnapshot.data!.uid;
+          return StreamBuilder<List<Orders>>(
+            stream: _fetchOrders(userId),
+            builder: (context, ordersSnapshot) {
+              if (ordersSnapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               }
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              if (!ordersSnapshot.hasData || ordersSnapshot.data!.isEmpty) {
                 return Center(child: Text('No orders found'));
               }
-              final orders = snapshot.data!;
+              final orders = ordersSnapshot.data!;
               return ListView.builder(
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
@@ -109,15 +117,15 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Vendor: $vendorId'),
-                                FutureBuilder<DocumentSnapshot>(
-                                  future: orderStatusId.get(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
+                                StreamBuilder<DocumentSnapshot>(
+                                  stream: orderStatusId.snapshots(),
+                                  builder: (context, statusSnapshot) {
+                                    if (statusSnapshot.connectionState ==
                                         ConnectionState.waiting) {
                                       return CircularProgressIndicator();
                                     }
                                     final orderStatusData =
-                                        snapshot.data?.get('description');
+                                        statusSnapshot.data?.get('description');
                                     final orderStatus =
                                         orderStatusData.toString();
                                     return Text('Order Status: $orderStatus');
