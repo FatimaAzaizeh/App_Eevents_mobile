@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Cart.dart';
 import 'package:testtapp/models/User.dart';
@@ -49,7 +51,14 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               address: '',
               isActive: true,
               imageUrl: '');
-          new_user.saveToDatabase();
+          String result = await new_user.saveToDatabase();
+          //هاي ما بظهرت
+          print(result);
+          QuickAlert.show(
+            context: context,
+            text: result,
+            type: QuickAlertType.info,
+          );
         }
         User? user = FirebaseAuth.instance.currentUser;
         Cart cartItem = Cart(userId: user!.uid, vendors: {});
