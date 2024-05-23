@@ -64,6 +64,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           email: emailController.text.trim(),
           password: passwordController.text,
         );
+        User? user1 = FirebaseAuth.instance.currentUser;
+        Cart cartItem2 = Cart(userId: user1!.uid, vendors: {});
+        cartItem2.uploadToFirebase();
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => HomeScreen()));
       }

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testtapp/models/Cart.dart';
+import 'package:testtapp/widgets/Item_vendore.dart'; // Import the Cart class
+
+double totalOrderPrice = 0.0;
+int totalQuantity = 0;
 
 class ShoppingCartPage extends StatefulWidget {
   static const String screenRoute = 'Cart';
@@ -13,6 +18,18 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Shopping Cart'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              // Call method to clear cart
+              cartItem.clearCart();
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -27,7 +44,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   if (!snapshot.hasData) {
                     return Center(child: Text('User not logged in'));
                   }
-                  final userId = snapshot.data?.uid ?? '';
+                  final userId = snapshot.data!.uid;
                   return StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('cart')
@@ -42,7 +59,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       }
 
                       final Map<String, dynamic>? cartData =
-                          snapshot.data?.data() as Map<String, dynamic>?;
+                          snapshot.data!.data() as Map<String, dynamic>?;
                       if (cartData == null) {
                         return Center(child: Text('No items in the cart'));
                       }
@@ -52,19 +69,48 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         return Center(child: Text('No items in the cart'));
                       }
 
-                      return ListView.builder(
-                        itemCount: vendors.length,
-                        itemBuilder: (context, index) {
-                          final vendorId = vendors.keys.elementAt(index);
-                          final items =
-                              vendors[vendorId] as Map<String, dynamic>;
+                      // Calculate total order price and total quantity
+                      totalOrderPrice = 0.0;
+                      totalQuantity = 0;
+                      vendors.values.forEach((items) {
+                        items.forEach((_, itemData) {
+                          totalOrderPrice += (itemData['price'] ?? 0.0) *
+                              (itemData['amount'] ?? 0);
+                          totalQuantity += (itemData['amount'] ?? 0) as int;
+                        });
+                      });
 
-                          return VendorContainer(
-                            vendorId: vendorId,
-                            items: items,
-                            userId: userId,
-                          );
-                        },
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: vendors.length,
+                              itemBuilder: (context, index) {
+                                final vendorId = vendors.keys.elementAt(index);
+                                final items =
+                                    vendors[vendorId] as Map<String, dynamic>;
+
+                                return VendorContainer(
+                                  vendorId: vendorId,
+                                  items: items,
+                                  userId: userId,
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            'Total Order Price: د.ك $totalOrderPrice',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Total Quantity: $totalQuantity',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       );
                     },
                   );
@@ -72,8 +118,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {},
-              child: Text('حدد العنوان'),
+              onPressed: () {
+                setState(() {
+                  cartItem.moveToOrders(totalOrderPrice, totalQuantity);
+                });
+              },
+              child: Text('Select Address'),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, 50),
               ),
@@ -81,7 +131,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             SizedBox(height: 10),
             OutlinedButton(
               onPressed: () {},
-              child: Text('متابعة التسوق'),
+              child: Text('Continue Shopping'),
               style: OutlinedButton.styleFrom(
                 minimumSize: Size(double.infinity, 50),
               ),
@@ -135,7 +185,6 @@ class VendorContainer extends StatelessWidget {
                   date: 'Description not available',
                   quantity: itemData['amount'],
                   price: itemData['price'],
-                  deliveryFee: 0.0, // Delivery fee handled separately
                   imageUrl: itemData['item_image'],
                 );
               }).toList(),
@@ -143,10 +192,6 @@ class VendorContainer extends StatelessWidget {
             SizedBox(height: 10),
             Text(
               'Total Price: د.ك $totalPrice',
-              style: TextStyle(color: Colors.green, fontSize: 16),
-            ),
-            Text(
-              'رسوم التوصيل: د.ك 0.0', // Replace with actual delivery fee if available
               style: TextStyle(color: Colors.green, fontSize: 16),
             ),
           ],
@@ -164,7 +209,6 @@ class CartItem extends StatelessWidget {
   final String date;
   final int quantity;
   final double price;
-  final double deliveryFee;
   final String imageUrl;
 
   CartItem({
@@ -175,7 +219,6 @@ class CartItem extends StatelessWidget {
     required this.date,
     required this.quantity,
     required this.price,
-    required this.deliveryFee,
     required this.imageUrl,
   });
 
@@ -184,6 +227,14 @@ class CartItem extends StatelessWidget {
       'vendors.$vendorId.$itemCode.amount': amount,
     }).catchError((error) {
       print('Error updating item amount: $error');
+    });
+  }
+
+  void _deleteItem() {
+    FirebaseFirestore.instance.collection('cart').doc(userId).update({
+      'vendors.$vendorId.$itemCode': FieldValue.delete(),
+    }).catchError((error) {
+      print('Error deleting item: $error');
     });
   }
 
@@ -243,20 +294,20 @@ class CartItem extends StatelessWidget {
                         _updateItemAmount(quantity + 1);
                       },
                     ),
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        _deleteItem();
+                      },
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'د.ك $price',
-                style: TextStyle(fontSize: 16, color: Colors.green),
-              ),
-              // Remove the delivery fee from here
-            ],
+          Text(
+            'د.ك $price',
+            style: TextStyle(fontSize: 16, color: Colors.green),
           ),
         ],
       ),

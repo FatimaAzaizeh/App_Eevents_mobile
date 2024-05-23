@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Cart.dart'; // Import the Cart class
 
 String Vendor_id = '';
-Cart cartItem = Cart(userId: ''); // Initialize Cart instance
+Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
 
 class VendorItemsPage extends StatefulWidget {
   final DocumentReference vendorId;
@@ -20,19 +20,14 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize Cart instance
-    getDataFromFirestore(); // Fetch vendor ID
+    getDataFromFirestore();
   }
 
   void getDataFromFirestore() async {
-    // Get the document snapshot from Firestore
     DocumentSnapshot documentSnapshot = await widget.vendorId.get();
-
-    // Check if the document exists
     if (documentSnapshot.exists) {
-      // Access the data inside the document directly
       Vendor_id = documentSnapshot.get('UID');
-      setState(() {}); // Update the UI after getting the data
+      setState(() {});
     } else {
       print('Document does not exist');
     }
@@ -47,10 +42,21 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
           IconButton(
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
-              // Upload cart data to Firebase
               cartItem.uploadToFirebase().then((result) {
                 print(result);
               });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              // Call the method to delete all items from the cart
+              cartItem.clearCart();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('All items deleted from cart.'),
+                ),
+              );
             },
           ),
           IconButton(
@@ -67,8 +73,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('item')
-                    .where('vendor_id',
-                        isEqualTo: widget.vendorId) // Use vendorId.id
+                    .where('vendor_id', isEqualTo: widget.vendorId)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -97,10 +102,9 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                             ? item['price'].toDouble()
                             : item['price'],
                         imageUrl: item['image_url'],
-                        addToCart: cartItem
-                            .addItemByVendorId, // Use addItemByVendorId method
-                        vendorId: Vendor_id, // Pass the vendor ID
-                        itemId: item.id, // Pass the item id
+                        addToCart: cartItem.addItemByVendorId,
+                        vendorId: Vendor_id,
+                        itemId: item.id,
                       );
                     },
                   );
@@ -118,18 +122,17 @@ class ServiceCard extends StatelessWidget {
   final String title;
   final double price;
   final String imageUrl;
-  final Function(String, String, String, String, double, int)
-      addToCart; // Change function signature
-  final String vendorId; // Vendor ID
-  final String itemId; // Item ID
+  final Function(String, String, String, String, double, int) addToCart;
+  final String vendorId;
+  final String itemId;
 
   ServiceCard({
     required this.title,
     required this.price,
     required this.imageUrl,
     required this.addToCart,
-    required this.vendorId, // Receive the vendor id
-    required this.itemId, // Receive the item id
+    required this.vendorId,
+    required this.itemId,
   });
 
   @override
@@ -175,15 +178,15 @@ class ServiceCard extends StatelessWidget {
                         child: IconButton(
                           icon: Icon(Icons.add_shopping_cart),
                           onPressed: () {
-                            cartItem.addItem(
-                              Vendor_id, // Vendor ID
-                              itemId, // Pass item id
-                              title, // Item name
-                              imageUrl, // Item image
-                              price, // Item price
+                            addToCart(
+                              vendorId,
+                              itemId,
+                              title,
+                              imageUrl,
+                              price,
                               1,
                             );
-                            cartItem.editItemAmount(Vendor_id, itemId);
+                            cartItem.editItemAmount(vendorId, itemId);
                           },
                         ),
                       ),
