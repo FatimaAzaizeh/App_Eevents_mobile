@@ -3,8 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Cart.dart'; // Import the Cart class
+import 'package:url_launcher/url_launcher.dart';
 
 String Vendor_id = '';
+String vendorUrl = '';
 Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
 
 class VendorItemsPage extends StatefulWidget {
@@ -27,9 +29,27 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
     DocumentSnapshot documentSnapshot = await widget.vendorId.get();
     if (documentSnapshot.exists) {
       Vendor_id = documentSnapshot.get('UID');
-      setState(() {});
+      DocumentSnapshot vendorDoc = await FirebaseFirestore.instance
+          .collection('vendor')
+          .doc(Vendor_id)
+          .get();
+
+      if (vendorDoc.exists) {
+        vendorUrl =
+            vendorDoc['location_url']; // Assuming 'url' is the field name
+        setState(() {});
+      } else {
+        print('Document does not exist');
+      }
+    }
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (await canLaunch(uri.toString())) {
+      await launch(uri.toString());
     } else {
-      print('Document does not exist');
+      throw 'Could not launch $url';
     }
   }
 
@@ -69,6 +89,20 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            ElevatedButton(
+              onPressed: () {
+                if (vendorUrl.isNotEmpty) {
+                  _launchURL(vendorUrl);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Vendor URL not available.'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Fetch Vendor URL Location'),
+            ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance

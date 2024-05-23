@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:testtapp/screens/EditProfile.dart';
 import 'package:testtapp/screens/order_history.dart';
 import 'package:testtapp/screens/order_status.dart';
 import 'package:testtapp/screens/login_signup.dart';
@@ -104,6 +105,21 @@ class _AppDrawerState extends State<AppDrawer> {
                     _auth.signOut();
                     Navigator.pushReplacementNamed(
                         context, LoginSignupScreen.screenRoute);
+                  },
+                  3,
+                ),
+
+                buildListTile(
+                  'اعدادات الملف الشخصي',
+                  Icons.manage_accounts,
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditUserPage(
+                            userId: _auth.currentUser!.uid.toString()),
+                      ),
+                    );
                   },
                   3,
                 ),
