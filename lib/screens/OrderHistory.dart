@@ -3,9 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Orders.dart';
 
-class OrderHistoryPage extends StatelessWidget {
+class OrderHistoryPage extends StatefulWidget {
   static const String screenRoute = 'OrderHistory';
 
+  @override
+  State<OrderHistoryPage> createState() => _OrderHistoryPageState();
+}
+
+class _OrderHistoryPageState extends State<OrderHistoryPage> {
   Future<List<Orders>> _fetchOrders(String userId) async {
     final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('orders')
@@ -36,12 +41,10 @@ class OrderHistoryPage extends StatelessWidget {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      // Assuming you are interested in the first matched document
       DocumentSnapshot itemSnapshot = querySnapshot.docs.first;
       final itemData = itemSnapshot.data() as Map<String, dynamic>?;
       return itemData?['image_url'] ?? '';
     } else {
-      // Handle the case where no documents matched the query
       return '';
     }
   }
@@ -86,21 +89,40 @@ class OrderHistoryPage extends StatelessWidget {
                           Text(
                             'Order ID: ${order.orderId}',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           SizedBox(height: 8),
                           Text(
-                              'Total Price: د.ك ${order.totalPrice.toStringAsFixed(2)}'),
+                            'Total Price: د.ك ${order.totalPrice.toStringAsFixed(2)}',
+                          ),
                           SizedBox(height: 8),
                           Text('Total Items: ${order.totalItems}'),
                           SizedBox(height: 8),
                           ...order.vendors.entries.map((vendorEntry) {
                             final vendorId = vendorEntry.key;
                             final vendorData = vendorEntry.value;
+                            final orderStatusId = vendorData['order_status_id']
+                                as DocumentReference;
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Vendor: $vendorId'),
+                                FutureBuilder<DocumentSnapshot>(
+                                  future: orderStatusId.get(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return CircularProgressIndicator();
+                                    }
+                                    final orderStatusData =
+                                        snapshot.data?.get('description');
+                                    final orderStatus =
+                                        orderStatusData.toString();
+                                    return Text('Order Status: $orderStatus');
+                                  },
+                                ),
                                 ...vendorData['vendor_id_items']
                                     .entries
                                     .map((itemEntry) {
@@ -125,7 +147,8 @@ class OrderHistoryPage extends StatelessWidget {
                                               height: 80,
                                               decoration: BoxDecoration(
                                                 border: Border.all(
-                                                    color: Colors.grey),
+                                                  color: Colors.grey,
+                                                ),
                                               ),
                                               child: itemImage.isNotEmpty
                                                   ? Image.network(
@@ -143,7 +166,8 @@ class OrderHistoryPage extends StatelessWidget {
                                                       },
                                                     )
                                                   : Center(
-                                                      child: Text('No Image')),
+                                                      child: Text('No Image'),
+                                                    ),
                                             ),
                                             SizedBox(width: 16),
                                             Expanded(
@@ -154,9 +178,10 @@ class OrderHistoryPage extends StatelessWidget {
                                                   Text(
                                                     itemData['item_name'],
                                                     style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold),
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                   SizedBox(height: 8),
                                                   Text(
