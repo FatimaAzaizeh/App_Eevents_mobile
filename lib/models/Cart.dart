@@ -146,23 +146,37 @@ class Cart {
       Orders orders = Orders(
         orderId: orderId,
         userId: this.userId,
-        vendors: vendors != null
-            ? vendors!
-            : {}, // Assign vendors with a default value if it's null
+        vendors: vendors!.map((vendorId, vendorData) {
+          return MapEntry(
+            vendorId,
+            {
+              'vendor_id': vendorId,
+              'created_at': DateTime.now(),
+              'deliver_at': DateTime.now().add(const Duration(days: 7)),
+              'order_status_id': FirebaseFirestore.instance
+                  .collection('order_status')
+                  .doc('1'), // example order status ID
+              'price': vendorData.values.fold(
+                  0.0,
+                  (sum, item) =>
+                      sum +
+                      (item['price'] as double) * (item['amount'] as int)),
+              'vendor_id_items': vendorData.map((itemCode, itemData) {
+                return MapEntry(
+                  itemCode,
+                  {
+                    'amount': itemData['amount'],
+                    'item_code': itemData['item_code'],
+                    'item_name': itemData['item_name'],
+                  },
+                );
+              }),
+            },
+          );
+        }),
         totalPrice: totalPrice,
         totalItems: totalItems,
       );
-
-      // Populate additional fields in orders
-      final DateTime now = DateTime.now();
-      final DateTime deliverAt =
-          now.add(const Duration(days: 7)); // Example: Deliver after 7 days
-      orders.vendors.values.forEach((vendorData) {
-        vendorData['created_at'] = now;
-        vendorData['deliver_at'] = deliverAt;
-        vendorData['order_status_id'] =
-            FirebaseFirestore.instance.collection('order_status').doc('1');
-      });
 
       // Upload orders to Firebase
       await orders.uploadToFirebase();

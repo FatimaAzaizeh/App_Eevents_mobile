@@ -353,37 +353,60 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
       IconData icon, String title, Color backgroundColor) {
     return TextButton(
       onPressed: () async {
-        {
-          final GoogleSignIn googleSignIn = GoogleSignIn();
+        final GoogleSignIn googleSignIn = GoogleSignIn();
 
-          try {
-            final GoogleSignInAccount? googleSignInAccount =
-                await googleSignIn.signIn();
-            final GoogleSignInAuthentication googleSignInAuthentication =
-                await googleSignInAccount!.authentication;
+        try {
+          final GoogleSignInAccount? googleSignInAccount =
+              await googleSignIn.signIn();
+          final GoogleSignInAuthentication googleSignInAuthentication =
+              await googleSignInAccount!.authentication;
 
-            final AuthCredential credential = GoogleAuthProvider.credential(
-              accessToken: googleSignInAuthentication.accessToken,
-              idToken: googleSignInAuthentication.idToken,
-            );
-            final UserCredential userCredential =
-                await FirebaseAuth.instance.signInWithCredential(credential);
-            final User? user = userCredential.user;
+          final AuthCredential credential = GoogleAuthProvider.credential(
+            accessToken: googleSignInAuthentication.accessToken,
+            idToken: googleSignInAuthentication.idToken,
+          );
+          final UserCredential userCredential =
+              await FirebaseAuth.instance.signInWithCredential(credential);
+          final User? user = userCredential.user;
 
-            // Use the user object for further operations or navigate to a new screen.
-            // Navigator.pushNamed(context, ChatScreen.screenRoute);
-          } catch (e) {
-            print(e.toString());
-          }
+          // Extract Gmail email address
+          String gmailEmail = googleSignInAccount.email;
+
+          // Extract user's name
+          String? userName = googleSignInAccount.displayName;
+
+          UserDataBase new_user = UserDataBase(
+            UID: user!.uid.toString(),
+            email: gmailEmail,
+            name: userName ?? '', // If displayName is null, use an empty string
+            user_type_id:
+                FirebaseFirestore.instance.collection('user_types').doc('2'),
+            phone: '',
+            address: '',
+            isActive: true,
+            imageUrl: '',
+          );
+          new_user.saveToDatabase();
+
+          User? currentUser = FirebaseAuth.instance.currentUser;
+          Cart cartItem = Cart(userId: currentUser!.uid, vendors: {});
+          cartItem.uploadToFirebase();
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+          );
+        } catch (e) {
+          print(e.toString());
         }
       },
       style: TextButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(width: 1, color: Colors.grey),
-          minimumSize: Size(145, 40),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: backgroundColor),
+        foregroundColor: Colors.white,
+        side: BorderSide(width: 1, color: Colors.grey),
+        minimumSize: Size(145, 40),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: backgroundColor,
+      ),
       child: Row(
         children: [
           Icon(

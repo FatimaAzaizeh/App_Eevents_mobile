@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Orders {
   String orderId;
   String userId;
-  Map<String, Map<String, dynamic>> vendors; // Remove the '?' here
+  Map<String, Map<String, dynamic>> vendors;
   double totalPrice;
   int totalItems;
 
   Orders({
     required this.orderId,
     required this.userId,
-    required this.vendors, // Remove the '?' here
+    required this.vendors,
     required this.totalPrice,
     required this.totalItems,
   });
@@ -28,10 +28,29 @@ class Orders {
         'user_id': userId,
         'total_price': totalPrice,
         'total_items': totalItems,
-        'vendors': vendors,
+        'vendors': vendors.map((key, value) {
+          return MapEntry(
+            key.toString(),
+            {
+              'vendor_id': value['vendor_id'],
+              'created_at': value['created_at'],
+              'deliver_at': value['deliver_at'],
+              'order_status_id': value['order_status_id'],
+              'price': value['price'],
+              'vendor_id_items': value['vendor_id_items'].map((k, v) {
+                return MapEntry(
+                  k.toString(),
+                  {
+                    'amount': v['amount'],
+                    'item_code': v['item_code'],
+                    'item_name': v['item_name'],
+                  },
+                );
+              }),
+            },
+          );
+        }),
       });
-
-      // Optionally, you can add additional fields here if needed
 
       print('Orders uploaded to Firebase successfully!');
     } catch (e) {
