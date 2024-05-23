@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:testtapp/screens/EditProfile.dart';
+import 'package:testtapp/screens/OrderHistory.dart';
 import 'package:testtapp/screens/order_history.dart';
 import 'package:testtapp/screens/order_status.dart';
 import 'package:testtapp/screens/login_signup.dart';
@@ -84,7 +85,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   'عرض الطلبات السابقة',
                   Icons.history,
                   () {
-                    Navigator.pushNamed(context, orderhistory.screenRoute);
+                    Navigator.pushNamed(context, OrderHistoryPage.screenRoute);
                   },
                   1,
                 ),

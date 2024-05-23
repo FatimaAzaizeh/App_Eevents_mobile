@@ -11,6 +11,7 @@ import 'package:testtapp/screens/AnimatedTextPage.dart';
 import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
+import 'package:testtapp/screens/OrderHistory.dart';
 import 'package:testtapp/screens/Service.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/screens/cart_screen.dart';
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
         orderhistory.screenRoute: (context) => orderhistory(),
         orderstatus.screenRoute: (context) => orderstatus(),
         checkoutscreen.screenRoute: (context) => checkoutscreen(),
+        OrderHistoryPage.screenRoute: (context) => OrderHistoryPage(),
       },
       home: AnimatedTextPage(),
     );
