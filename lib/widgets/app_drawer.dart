@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:testtapp/screens/EditProfile.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
-import 'package:testtapp/screens/order_history.dart';
-import 'package:testtapp/screens/order_status.dart';
 import 'package:testtapp/screens/login_signup.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -89,15 +87,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   },
                   1,
                 ),
-                SizedBox(height: 20), // Add SizedBox here for spacing
-                buildListTile(
-                  'حالة الطلب',
-                  Icons.assignment_turned_in_outlined,
-                  () {
-                    Navigator.pushNamed(context, orderstatus.screenRoute);
-                  },
-                  2,
-                ),
+
                 SizedBox(height: 20), // Add SizedBox here for spacing
                 buildListTile(
                   'تسجيل الخروج',

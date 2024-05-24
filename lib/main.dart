@@ -3,12 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
 
 import 'package:testtapp/firebase_options.dart';
 
 import 'package:testtapp/screens/AnimatedTextPage.dart';
-import 'package:testtapp/screens/Cart.dart';
+
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
@@ -18,8 +17,7 @@ import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/screens/checkout_screen.dart';
 
 import 'package:testtapp/screens/login_signup.dart';
-import 'package:testtapp/screens/order_history.dart';
-import 'package:testtapp/screens/order_status.dart';
+import 'package:testtapp/widgets/AppBarEebvents.dart';
 
 final _auth = FirebaseAuth.instance;
 void main() async {
@@ -63,10 +61,9 @@ class MyApp extends StatelessWidget {
         Service.screenRoute: (context) => Service(),
         EventScreen.screenRoute: (context) => EventScreen(),
         cartScreen.screenRoute: (context) => cartScreen(),
-        orderhistory.screenRoute: (context) => orderhistory(),
-        orderstatus.screenRoute: (context) => orderstatus(),
         checkoutscreen.screenRoute: (context) => checkoutscreen(),
         OrderHistoryPage.screenRoute: (context) => OrderHistoryPage(),
+        AppBarEebvents.screenRoute: (context) => AppBarEebvents(),
       },
       home: AnimatedTextPage(),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:testtapp/constants.dart';
 
 class AppBarEebvents extends StatelessWidget implements PreferredSizeWidget {
+  static const String screenRoute = 'AppBarEebvents';
   const AppBarEebvents({Key? key}) : super(key: key);
 
   @override
