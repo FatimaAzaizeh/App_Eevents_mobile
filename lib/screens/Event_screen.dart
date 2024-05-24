@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:testtapp/widgets/Event_item.dart';
+import 'package:testtapp/wizard/WizardSteps.dart';
 
-class EventScreen extends StatelessWidget {
+class EventScreen extends StatefulWidget {
   static const String screenRoute = 'Event_screen';
 
+  @override
+  State<EventScreen> createState() => _EventScreenState();
+}
+
+class _EventScreenState extends State<EventScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -18,7 +24,7 @@ class EventScreen extends StatelessWidget {
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else {
-              final eventDocs = snapshot.data!.docs;
+              final eventDocs = snapshot.data?.docs ?? [];
               return GridView.builder(
                 padding: EdgeInsets.all(10),
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
@@ -35,7 +41,7 @@ class EventScreen extends StatelessWidget {
                     imageUrl: doc['image_url'].toString(),
                     id: doc.id,
                     onTapFunction: () {
-                      //  getDataById(doc.id);
+                      // Implement the desired onTap functionality here
                     },
                   );
                 },

@@ -5,6 +5,7 @@ import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/screens/cart_screen.dart';
+import 'package:testtapp/widgets/AppBarApp.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -36,20 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: AppDrawer(
         onItemTapped: (int) {},
       ),
-      appBar: AppBar(
-        backgroundColor: ColorPink_100,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Center(
-              child: Image.asset(
-                'assets/images/logo2.png', // Replace this with your image path
-                height: 100, // Adjust the height as needed
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: AppBarEebvents(),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: ColorPink_20,
