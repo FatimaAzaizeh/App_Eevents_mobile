@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_stepper/easy_stepper.dart';
-import 'package:testtapp/screens/Service.dart';
+import 'package:testtapp/screens/DisplayService.dart';
 import 'package:testtapp/widgets/AppBarApp.dart';
 
 class WizardSteps extends StatefulWidget {
@@ -10,6 +10,7 @@ class WizardSteps extends StatefulWidget {
   final List<String> titles;
   final List<DocumentReference> pages;
   final ValueChanged<int> onStepTapped;
+  final String id;
 
   WizardSteps({
     Key? key,
@@ -18,6 +19,7 @@ class WizardSteps extends StatefulWidget {
     required this.titles,
     required this.pages,
     required this.onStepTapped,
+    required this.id,
   }) : super(key: key);
 
   @override
@@ -97,6 +99,9 @@ class _WizardStepsState extends State<WizardSteps> {
                   height: double.maxFinite,
                   child: DisplayService(
                     idService: widget.pages[activeStep],
+                    Eventid: FirebaseFirestore.instance
+                        .collection('event_types')
+                        .doc(widget.id),
                   ),
                 ),
               ),

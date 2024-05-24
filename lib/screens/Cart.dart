@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Cart.dart';
-import 'package:testtapp/widgets/Item_vendore.dart'; // Import the Cart class
+import 'package:testtapp/widgets/VendorItemsPage.dart'; // Import the Cart class
 
 double totalOrderPrice = 0.0;
 int totalQuantity = 0;

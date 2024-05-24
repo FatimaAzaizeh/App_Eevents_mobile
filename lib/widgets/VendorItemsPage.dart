@@ -11,8 +11,8 @@ Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
 
 class VendorItemsPage extends StatefulWidget {
   final DocumentReference vendorId;
-
-  VendorItemsPage({required this.vendorId});
+  final DocumentReference? EventId;
+  VendorItemsPage({required this.vendorId, this.EventId});
 
   @override
   _VendorItemsPageState createState() => _VendorItemsPageState();
@@ -108,6 +108,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                 stream: FirebaseFirestore.instance
                     .collection('item')
                     .where('vendor_id', isEqualTo: widget.vendorId)
+                    .where('event_type_id', isEqualTo: widget.EventId)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:testtapp/widgets/Item_vendore.dart';
+
 import 'package:testtapp/widgets/Service.dart';
 
 class DisplayService extends StatelessWidget {
-  static const screenRouter = 'Service';
+  static const screenRouter = 'DisplayService';
   final DocumentReference idService;
+  final DocumentReference? Eventid;
 
-  const DisplayService({Key? key, required this.idService}) : super(key: key);
+  const DisplayService({Key? key, required this.idService, this.Eventid})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class DisplayService extends StatelessWidget {
                   imageUrl: doc['logo_url'],
                   id: doc.id,
                   description: doc['bio'],
+                  Idevent: Eventid,
                 ),
               );
             },
@@ -45,11 +48,5 @@ class DisplayService extends StatelessWidget {
         },
       ),
     );
-  }
-
-  void _removeService(BuildContext context, String serviceId) {
-    // Implement your removal logic here, maybe show a confirmation dialog.
-    // For now, we'll just print the id.
-    print('Removing service with id: $serviceId');
   }
 }

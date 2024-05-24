@@ -12,7 +12,7 @@ import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
-import 'package:testtapp/screens/Service.dart';
+import 'package:testtapp/screens/DisplayService.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/screens/checkout_screen.dart';

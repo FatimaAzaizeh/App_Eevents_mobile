@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:testtapp/widgets/Item_vendore.dart';
+import 'package:testtapp/widgets/VendorItemsPage.dart';
 
 class service extends StatelessWidget {
   final String id;
   final String title;
   final String imageUrl;
   final String description;
+  final DocumentReference? Idevent;
 
   const service({
     Key? key,
@@ -14,6 +15,7 @@ class service extends StatelessWidget {
     required this.title,
     required this.imageUrl,
     required this.description,
+    this.Idevent,
   }) : super(key: key);
 
   @override
@@ -22,11 +24,13 @@ class service extends StatelessWidget {
       onTap: () {
         DocumentReference VendorId =
             FirebaseFirestore.instance.collection('vendor').doc(id);
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => VendorItemsPage(
               vendorId: VendorId,
+              EventId: Idevent,
             ),
           ),
         );

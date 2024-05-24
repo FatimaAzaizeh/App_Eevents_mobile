@@ -91,6 +91,7 @@ class _EventItemDisplayState extends State<EventItemDisplay> {
                 onStepTapped: (int value) {
                   // Add your onTap logic here if needed
                 },
+                id: widget.id,
               ),
             ),
           );
