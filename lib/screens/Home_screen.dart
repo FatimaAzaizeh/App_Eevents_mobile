@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:testtapp/constants.dart';
+import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
+import 'package:testtapp/screens/Service_screen.dart';
+import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/widgets/AppBarEebvents.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
-import 'package:testtapp/widgets/bottombar.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String screenRoute = 'Home_screen';
@@ -13,15 +17,49 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 1; // Initially selected index for the home icon
+
+  static List<Widget> _widgetOptions = <Widget>[
+    Service(), // Dashboard screen
+    EventScreen(), // Event screen
+    ShoppingCartPage(), // Cart screen
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarEebvents(), // Correct usage of appBar
       drawer: AppDrawer(
         onItemTapped: (int) {},
       ),
-      body: EventScreen(),
-      bottomNavigationBar: BottomBar(),
+      appBar: AppBarEebvents(),
+      body: _widgetOptions.elementAt(_selectedIndex),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: ColorPink_20,
+        color: ColorPink_100,
+        animationDuration: Duration(milliseconds: 300),
+        onTap: _onItemTapped,
+        index: _selectedIndex, // Set the default selected index
+        items: <Widget>[
+          Icon(
+            Icons.dashboard,
+            color: Colors.white,
+          ),
+          Icon(
+            Icons.home,
+            color: Colors.white,
+          ),
+          Icon(
+            Icons.shopping_cart,
+            color: Colors.white,
+          ),
+        ],
+      ),
     );
   }
 }
