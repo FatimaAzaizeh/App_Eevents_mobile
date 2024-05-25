@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testtapp/Design/item_design.dart';
 import 'package:testtapp/models/Cart.dart'; // Import the Cart class
 import 'package:url_launcher/url_launcher.dart';
 
@@ -139,7 +140,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                         imageUrl: item['image_url'],
                         addToCart: cartItem.addItemByVendorId,
                         vendorId: Vendor_id,
-                        itemId: item.id,
+                        itemId: item['item_code'],
                       );
                     },
                   );
@@ -172,71 +173,87 @@ class ServiceCard extends StatelessWidget {
   bool firsttime = true;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Image.network(
-                  imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'د.ك $price',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: Icon(Icons.add_shopping_cart),
-                          onPressed: () {
-                            if (firsttime) {
-                              addToCart(
-                                vendorId,
-                                itemId,
-                                title,
-                                imageUrl,
-                                price,
-                                1,
-                              );
-                              firsttime = false;
-                            } else {
-                              cartItem.editItemAmount(vendorId, itemId);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return TextButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetails(
+              itemCode: itemId,
+              vendorId: Vendor_id,
+              firstime: firsttime,
             ),
-          ],
+          ),
+        );
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 10),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Image.network(
+                    imageUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'د.ك $price',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.green,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: Icon(Icons.add_shopping_cart),
+                            onPressed: () {
+                              if (firsttime) {
+                                addToCart(
+                                  vendorId,
+                                  itemId,
+                                  title,
+                                  imageUrl,
+                                  price,
+                                  1,
+                                );
+                                firsttime = false;
+                              } else {
+                                cartItem.editItemAmount(vendorId, itemId);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+//هاي الصفحة ممكن فيها مشاكل تضارب مع تاي قبلها 
