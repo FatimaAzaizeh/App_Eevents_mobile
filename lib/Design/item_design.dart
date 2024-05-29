@@ -1,17 +1,22 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Corrected import statement
-import 'package:testtapp/models/Cart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
-Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
+import 'package:testtapp/models/Cart.dart'; // Import your Cart model
+import 'package:testtapp/widgets/VendorItemsPage.dart';
 
 class ProductDetails extends StatefulWidget {
   final String itemCode;
   final String vendorId;
-  bool firstime;
+  Cart cartItem;
 
-  ProductDetails(
-      {required this.itemCode, required this.vendorId, required this.firstime});
+  ProductDetails({
+    Key? key,
+    required this.itemCode,
+    required this.vendorId,
+    required this.cartItem,
+  }) : super(key: key);
 
   @override
   _ProductDetailsState createState() => _ProductDetailsState();
@@ -19,11 +24,14 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   DocumentSnapshot? itemData;
+// Declare cartItem here
 
   @override
   void initState() {
     super.initState();
     fetchItemData();
+    // Initialize the Cart instance
+    String userId = FirebaseAuth.instance.currentUser!.uid;
   }
 
   void fetchItemData() async {
@@ -100,7 +108,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               children: [
                 TextButton(
                   onPressed: () {
-                    if (widget.firstime) {
+                    setState(() {
                       cartItem.addItem(
                         widget.vendorId,
                         data['item_code'].toString(),
@@ -109,11 +117,13 @@ class _ProductDetailsState extends State<ProductDetails> {
                         double.parse(data['price'].toString()),
                         1,
                       );
-                      widget.firstime = false;
-                    } else {
-                      cartItem.editItemAmount(
-                          widget.itemCode, data['item_code']);
-                    }
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${data['name']} added to the cart.'),
+                      ),
+                    );
                   },
                   child: Text(
                     'Add to Bag',

@@ -1,33 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:email_sender/email_sender.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Orders.dart';
 
 class Cart {
   String userId;
-  Map<String, Map<String, dynamic>>? vendors;
+  Map<String, Map<String, dynamic>> vendors;
 
-  Cart({required this.userId, this.vendors});
+  Cart({required this.userId, Map<String, Map<String, dynamic>>? vendors})
+      : vendors = vendors ?? {};
 
   // Method to add an item to the cart
-  void addItem(String vendorId, String itemCode, String itemName,
+  String addItem(String vendorId, String itemCode, String itemName,
       String itemImage, double price, int amount) {
-    vendors ??= {};
+    vendors.putIfAbsent(vendorId, () => {});
 
-    vendors!.putIfAbsent(vendorId, () => {});
-
-    vendors![vendorId]![itemCode] = {
-      'amount': amount,
-      'item_code': itemCode,
-      'item_name': itemName,
-      'item_image': itemImage,
-      'price': price,
-    };
+    if (vendors[vendorId]!.containsKey(itemCode)) {
+      vendors[vendorId]![itemCode]['amount'] += amount;
+    } else {
+      vendors[vendorId]![itemCode] = {
+        'amount': amount,
+        'item_code': itemCode,
+        'item_name': itemName,
+        'item_image': itemImage,
+        'price': price,
+      };
+    }
 
     updateFirestore();
+    return 'Item added to cart.';
   }
 
   // Method to update Firestore document with cart data
-  Future<void> updateFirestore() async {
+  Future<String> updateFirestore() async {
     try {
       CollectionReference cartCollection =
           FirebaseFirestore.instance.collection('cart');
@@ -38,55 +43,59 @@ class Cart {
         'user_id': userId,
         'vendors': vendors,
       });
+      return 'Cart data updated successfully.';
     } catch (error) {
-      print('Error updating Firestore: $error');
+      return 'Error updating Firestore: $error';
     }
   }
 
   // Method to edit an item in the cart
-  void editItem(String vendorId, String itemCode,
+  String editItem(String vendorId, String itemCode,
       {String? itemName, String? itemImage, double? price, int? amount}) {
-    if (vendors != null &&
-        vendors!.containsKey(vendorId) &&
-        vendors![vendorId]!.containsKey(itemCode)) {
+    if (vendors.containsKey(vendorId) &&
+        vendors[vendorId]!.containsKey(itemCode)) {
       if (itemName != null)
-        vendors![vendorId]![itemCode]!['item_name'] = itemName;
+        vendors[vendorId]![itemCode]['item_name'] = itemName;
       if (itemImage != null)
-        vendors![vendorId]![itemCode]!['item_image'] = itemImage;
-      if (price != null) vendors![vendorId]![itemCode]!['price'] = price;
-      if (amount != null) vendors![vendorId]![itemCode]!['amount'] = amount;
+        vendors[vendorId]![itemCode]['item_image'] = itemImage;
+      if (price != null) vendors[vendorId]![itemCode]['price'] = price;
+      if (amount != null) vendors[vendorId]![itemCode]['amount'] = amount;
       updateFirestore();
+      return 'Item edited successfully.';
+    } else {
+      return 'Item not found in cart.';
     }
   }
 
   // Method to delete an item from the cart
-  void deleteItem(String vendorId, String itemCode) {
-    if (vendors != null &&
-        vendors!.containsKey(vendorId) &&
-        vendors![vendorId]!.containsKey(itemCode)) {
-      vendors![vendorId]!.remove(itemCode);
-      if (vendors![vendorId]!.isEmpty) {
-        vendors!.remove(vendorId);
+  String deleteItem(String vendorId, String itemCode) {
+    if (vendors.containsKey(vendorId) &&
+        vendors[vendorId]!.containsKey(itemCode)) {
+      vendors[vendorId]!.remove(itemCode);
+      if (vendors[vendorId]!.isEmpty) {
+        vendors.remove(vendorId);
       }
       updateFirestore();
+      return 'Item deleted from cart.';
+    } else {
+      return 'Item not found in cart.';
     }
   }
 
   // Method to check if an item exists in the cart
   bool itemExists(String vendorId, String itemCode) {
-    return vendors != null &&
-        vendors!.containsKey(vendorId) &&
-        vendors![vendorId]!.containsKey(itemCode);
+    return vendors.containsKey(vendorId) &&
+        vendors[vendorId]!.containsKey(itemCode);
   }
 
   // Method to edit the amount of an item in the cart
-  void editItemAmount(String vendorId, String itemCode) {
+  String editItemAmount(String vendorId, String itemCode, int amount) {
     if (itemExists(vendorId, itemCode)) {
-      int amount = vendors![vendorId]![itemCode]!['amount'];
-      vendors![vendorId]![itemCode]!['amount'] = amount + 1;
+      vendors[vendorId]![itemCode]['amount'] += amount;
       updateFirestore();
+      return 'Item amount updated successfully.';
     } else {
-      print('Item with vendorId: $vendorId and itemCode: $itemCode not found.');
+      return 'Item not found in cart.';
     }
   }
 
@@ -96,25 +105,23 @@ class Cart {
         FirebaseFirestore.instance.collection('cart');
     try {
       DocumentReference docRef = cartCollection.doc(userId);
-      if (vendors != null) {
+      if (vendors.isNotEmpty) {
         await docRef.set({
           'user_id': userId,
           'vendors': vendors,
         });
       }
-      return 'DocumentSnapshot added with ID: $userId';
+      return 'Cart data uploaded to Firebase.';
     } catch (error) {
-      return 'Error adding document: $error';
+      return 'Error uploading cart data: $error';
     }
   }
 
   // Method to add an item to the cart based on vendorId
   void addItemByVendorId(String vendorId, String itemCode, String itemName,
       String itemImage, double price, int amount) {
-    vendors ??= {};
-    vendors!.putIfAbsent(vendorId, () => {});
+    vendors.putIfAbsent(vendorId, () => {});
 
-    // Create a new map for the item data
     Map<String, dynamic> itemData = {
       'amount': amount,
       'item_code': itemCode,
@@ -123,20 +130,19 @@ class Cart {
       'price': price,
     };
 
-    // Add the item to the vendor's list
-    vendors![vendorId]![itemCode] = itemData;
+    vendors[vendorId]![itemCode] = itemData;
 
-    // Update Firestore
     updateFirestore();
   }
 
   // Method to clear all items from the cart
-  void clearCart() {
-    vendors?.clear();
+  String clearCart() {
+    vendors.clear();
     updateFirestore();
+    return 'Cart cleared successfully.';
   }
 
-  // Method to move records from cart to orders
+// Method to move records from cart to orders
   Future<void> moveToOrders(double totalPrice, int totalItems) async {
     try {
       // Generate order ID from document ID
@@ -180,11 +186,47 @@ class Cart {
 
       // Upload orders to Firebase
       await orders.uploadToFirebase();
-
+      for (String vendorId in vendors.keys) {
+        String vendorEmail = await getVendorEmail(vendorId);
+        if (vendorEmail != null) {
+          await sendEmail(vendorEmail);
+        }
+      }
       // Clear cart after moving records to orders
       clearCart();
     } catch (error) {
       print('Error moving records to orders: $error');
+    }
+  }
+
+// Fetch vendor email from Firestore
+  Future<String> getVendorEmail(String vendorId) async {
+    try {
+      DocumentSnapshot vendorSnapshot = await FirebaseFirestore.instance
+          .collection('vendor')
+          .doc(vendorId)
+          .get();
+      if (vendorSnapshot.exists) {
+        return vendorSnapshot['email'];
+      } else {
+        print('Vendor with ID $vendorId not found.');
+        return '';
+      }
+    } catch (error) {
+      print('Error fetching vendor email: $error');
+      return '';
+    }
+  }
+
+  Future<void> sendEmail(String email) async {
+    EmailSender emailsender = EmailSender();
+    var response = await emailsender.sendMessage(
+        "fatimaazaizeh@gmail.com", "title", "subject", "body");
+
+    if (response["message"] == "emailSendSuccess") {
+      print('SUCCESS! Email sent to $email');
+    } else {
+      print('ERROR! Failed to send email to $email: ${response["error"]}');
     }
   }
 }

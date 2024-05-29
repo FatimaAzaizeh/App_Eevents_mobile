@@ -18,22 +18,17 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Shopping Cart'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () {
-              // Call method to clear cart
-              cartItem.clearCart();
-            },
-          ),
-        ],
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                // Call method to clear cart
+                cartItem.clearCart();
+              },
+            ),
             Expanded(
               child: FutureBuilder<User?>(
                 future: FirebaseAuth.instance.authStateChanges().first,
@@ -182,7 +177,6 @@ class VendorContainer extends StatelessWidget {
                   vendorId: vendorId,
                   itemCode: entry.key,
                   title: itemData['item_name'],
-                  date: 'Description not available',
                   quantity: itemData['amount'],
                   price: itemData['price'],
                   imageUrl: itemData['item_image'],
@@ -206,7 +200,7 @@ class CartItem extends StatelessWidget {
   final String vendorId;
   final String itemCode;
   final String title;
-  final String date;
+
   final int quantity;
   final double price;
   final String imageUrl;
@@ -216,7 +210,6 @@ class CartItem extends StatelessWidget {
     required this.vendorId,
     required this.itemCode,
     required this.title,
-    required this.date,
     required this.quantity,
     required this.price,
     required this.imageUrl,
@@ -245,8 +238,8 @@ class CartItem extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
             ),
@@ -275,7 +268,6 @@ class CartItem extends StatelessWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8),
-                Text(date),
                 SizedBox(height: 8),
                 Row(
                   children: [
@@ -287,7 +279,7 @@ class CartItem extends StatelessWidget {
                         }
                       },
                     ),
-                    Text('كمية: $quantity'),
+                    Text('عدد المنتجات: $quantity'),
                     IconButton(
                       icon: Icon(Icons.add),
                       onPressed: () {
@@ -306,7 +298,7 @@ class CartItem extends StatelessWidget {
             ),
           ),
           Text(
-            'د.ك $price',
+            'د.ا $price',
             style: TextStyle(fontSize: 16, color: Colors.green),
           ),
         ],

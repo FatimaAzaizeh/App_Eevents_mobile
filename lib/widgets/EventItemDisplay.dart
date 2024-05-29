@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:testtapp/Design/framApp.dart';
 import 'package:testtapp/wizard/WizardSteps.dart'; // Import WizardSteps correctly
 
 class EventItemDisplay extends StatefulWidget {

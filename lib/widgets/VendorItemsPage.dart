@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/Design/item_design.dart';
 import 'package:testtapp/models/Cart.dart'; // Import the Cart class
+import 'package:testtapp/widgets/AppBarEevents.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 String Vendor_id = '';
 String vendorUrl = '';
+String VendorName = '';
 Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
 
 class VendorItemsPage extends StatefulWidget {
@@ -38,6 +39,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
       if (vendorDoc.exists) {
         vendorUrl =
             vendorDoc['location_url']; // Assuming 'url' is the field name
+        VendorName = vendorDoc['business_name'];
         setState(() {});
       } else {
         print('Document does not exist');
@@ -57,52 +59,37 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Items from Vendor ${widget.vendorId.id}'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              cartItem.uploadToFirebase().then((result) {
-                print(result);
-              });
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () {
-              // Call the method to delete all items from the cart
-              cartItem.clearCart();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('All items deleted from cart.'),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: AppBarEevents(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: () {
-                if (vendorUrl.isNotEmpty) {
-                  _launchURL(vendorUrl);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Vendor URL not available.'),
-                    ),
-                  );
-                }
-              },
-              child: Text('Fetch Vendor URL Location'),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  VendorName,
+                  style: TextStyle(fontSize: 28),
+                ),
+                FloatingActionButton(
+                  onPressed: () {
+                    if (vendorUrl.isNotEmpty) {
+                      _launchURL(vendorUrl);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Vendor URL not available.'),
+                        ),
+                      );
+                    }
+                  },
+                  child: Tooltip(
+                    message: 'View Vendor Location',
+                    child: Icon(Icons.location_on),
+                  ),
+                ),
+              ],
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -138,7 +125,6 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                             ? item['price'].toDouble()
                             : item['price'],
                         imageUrl: item['image_url'],
-                        addToCart: cartItem.addItemByVendorId,
                         vendorId: Vendor_id,
                         itemId: item['item_code'],
                       );
@@ -158,7 +144,7 @@ class ServiceCard extends StatelessWidget {
   final String title;
   final double price;
   final String imageUrl;
-  final Function(String, String, String, String, double, int) addToCart;
+
   final String vendorId;
   final String itemId;
 
@@ -166,11 +152,10 @@ class ServiceCard extends StatelessWidget {
     required this.title,
     required this.price,
     required this.imageUrl,
-    required this.addToCart,
     required this.vendorId,
     required this.itemId,
   });
-  bool firsttime = true;
+
   @override
   Widget build(BuildContext context) {
     return TextButton(
@@ -181,7 +166,7 @@ class ServiceCard extends StatelessWidget {
             builder: (context) => ProductDetails(
               itemCode: itemId,
               vendorId: Vendor_id,
-              firstime: firsttime,
+              cartItem: cartItem,
             ),
           ),
         );
@@ -215,7 +200,7 @@ class ServiceCard extends StatelessWidget {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'د.ك $price',
+                          'د.ا $price',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.green,
@@ -227,19 +212,14 @@ class ServiceCard extends StatelessWidget {
                           child: IconButton(
                             icon: Icon(Icons.add_shopping_cart),
                             onPressed: () {
-                              if (firsttime) {
-                                addToCart(
-                                  vendorId,
-                                  itemId,
-                                  title,
-                                  imageUrl,
-                                  price,
-                                  1,
-                                );
-                                firsttime = false;
-                              } else {
-                                cartItem.editItemAmount(vendorId, itemId);
-                              }
+                              cartItem.addItem(
+                                vendorId,
+                                itemId,
+                                title,
+                                imageUrl,
+                                price,
+                                1,
+                              );
                             },
                           ),
                         ),
@@ -255,5 +235,3 @@ class ServiceCard extends StatelessWidget {
     );
   }
 }
-
-//هاي الصفحة ممكن فيها مشاكل تضارب مع تاي قبلها 

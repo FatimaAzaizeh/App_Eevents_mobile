@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:testtapp/constants.dart';
 
-class AppBarEebvents extends StatelessWidget implements PreferredSizeWidget {
-  static const String screenRoute = 'AppBarEebvents';
-  const AppBarEebvents({Key? key}) : super(key: key);
+class AppBarEevents extends StatelessWidget implements PreferredSizeWidget {
+  static const String screenRoute = 'AppBarEevents';
+  const AppBarEevents({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: ColorPink_100,
+      backgroundColor: Colors.white,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [

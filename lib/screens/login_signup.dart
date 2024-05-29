@@ -62,6 +62,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
         }
         User? user = FirebaseAuth.instance.currentUser;
         Cart cartItem = Cart(userId: user!.uid, vendors: {});
+
         cartItem.uploadToFirebase();
         Navigator.push(
           context,

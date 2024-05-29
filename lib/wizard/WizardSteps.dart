@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:testtapp/screens/DisplayService.dart';
-import 'package:testtapp/widgets/AppBarEebvents.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
 
 class WizardSteps extends StatefulWidget {
@@ -44,10 +44,6 @@ class _WizardStepsState extends State<WizardSteps> {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBarEebvents(), // Correct usage of appBar
-        drawer: AppDrawer(
-          onItemTapped: (int) {},
-        ),
         body: SingleChildScrollView(
           child: Column(
             children: [

@@ -17,7 +17,7 @@ import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/screens/checkout_screen.dart';
 
 import 'package:testtapp/screens/login_signup.dart';
-import 'package:testtapp/widgets/AppBarEebvents.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
 
 final _auth = FirebaseAuth.instance;
 void main() async {
@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
         cartScreen.screenRoute: (context) => cartScreen(),
         checkoutscreen.screenRoute: (context) => checkoutscreen(),
         OrderHistoryPage.screenRoute: (context) => OrderHistoryPage(),
-        AppBarEebvents.screenRoute: (context) => AppBarEebvents(),
+        AppBarEevents.screenRoute: (context) => AppBarEevents(),
       },
       home: AnimatedTextPage(),
     );
