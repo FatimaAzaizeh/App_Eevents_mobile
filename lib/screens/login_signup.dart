@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -33,15 +32,22 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   void _authenticateUser() async {
     try {
       if (isSignupScreen) {
+        if (passwordSingUpController.text.length < 6) {
+          QuickAlert.show(
+            context: context,
+            text: 'كلمة السر يجب أن تكون 6 أحرف على الأقل',
+            type: QuickAlertType.error,
+          );
+          return;
+        }
         final newUser = await _auth.createUserWithEmailAndPassword(
           email: emailSingUpController.text.trim(),
           password: passwordSingUpController.text,
         );
         if (newUser.user != null) {
-          String? uid =
-              newUser.user!.uid; // Access the UID from the created user
+          String? uid = newUser.user!.uid;
 
-          UserDataBase new_user = new UserDataBase(
+          UserDataBase new_user = UserDataBase(
               UID: uid,
               email: emailSingUpController.text,
               name: NameController.text,
@@ -52,8 +58,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               isActive: true,
               imageUrl: '');
           String result = await new_user.saveToDatabase();
-          //هاي ما بظهرت
-          print(result);
           QuickAlert.show(
             context: context,
             text: result,
@@ -62,14 +66,12 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
         }
         User? user = FirebaseAuth.instance.currentUser;
         Cart cartItem = Cart(userId: user!.uid, vendors: {});
-
         cartItem.uploadToFirebase();
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
-        // Sign in logic
         final user = await _auth.signInWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text,
@@ -82,7 +84,25 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
       }
     } catch (e) {
       print('Authentication Error: $e');
-      // Handle authentication errors (e.g., show error message)
+      if (e is FirebaseAuthException) {
+        String errorMessage;
+        if (e.code == 'email-already-in-use') {
+          errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
+        } else if (e.code == 'user-not-found') {
+          errorMessage = 'البريد الإلكتروني غير مسجل';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'كلمة السر غير صحيحة';
+        } else if (e.code == 'weak-password') {
+          errorMessage = 'كلمة السر يجب أن تكون 6 أحرف على الأقل';
+        } else {
+          errorMessage = 'حدث خطأ ما. حاول مرة أخرى.';
+        }
+        QuickAlert.show(
+          context: context,
+          text: errorMessage,
+          type: QuickAlertType.error,
+        );
+      }
     }
   }
 
@@ -231,16 +251,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               emailController),
           buildTextField(Icons.lock_outline, "**********", true, false,
               passwordController),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () {},
-                child: Text("نسيت كلمة السر؟",
-                    style: TextStyle(fontSize: 12, color: Palette.textColor1)),
-              )
-            ],
-          )
         ],
       ),
     );
@@ -257,86 +267,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               emailSingUpController),
           buildTextField(Icons.lock_outline, "كلمة السر", true, false,
               passwordSingUpController),
-          Padding(
-            padding: const EdgeInsets.only(top: 10, left: 10),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isMale = true;
-                      genderController.text = 'male';
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                            color: isMale
-                                ? Palette.textColor2
-                                : Colors.transparent,
-                            border: Border.all(
-                                width: 1,
-                                color: isMale
-                                    ? Colors.transparent
-                                    : Palette.textColor1),
-                            borderRadius: BorderRadius.circular(15)),
-                        child: Icon(
-                          Icons.account_box_outlined,
-                          color: isMale ? Colors.white : Palette.iconColor,
-                        ),
-                      ),
-                      Text(
-                        "ذكر",
-                        style: TextStyle(color: Palette.textColor1),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 30,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isMale = false;
-                      genderController.text = 'female';
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                            color: isMale
-                                ? Colors.transparent
-                                : Palette.textColor2,
-                            border: Border.all(
-                                width: 1,
-                                color: isMale
-                                    ? Palette.textColor1
-                                    : Colors.transparent),
-                            borderRadius: BorderRadius.circular(15)),
-                        child: Icon(
-                          Icons.account_box_outlined,
-                          color: isMale ? Palette.iconColor : Colors.white,
-                        ),
-                      ),
-                      Text(
-                        "انثى",
-                        style: TextStyle(color: Palette.textColor1),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
           Container(
             width: 200,
             margin: EdgeInsets.only(top: 8),
