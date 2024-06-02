@@ -18,6 +18,10 @@ class DisplayService extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('vendor')
             .where('service_types_id', isEqualTo: idService)
+            .where('vendor_status_id',
+                isEqualTo: FirebaseFirestore.instance
+                    .collection("vendor_status")
+                    .doc('2'))
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
