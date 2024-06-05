@@ -97,6 +97,10 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                     .collection('item')
                     .where('vendor_id', isEqualTo: widget.vendorId)
                     .where('event_type_id', isEqualTo: widget.EventId)
+                    .where('item_status_id',
+                        isEqualTo: FirebaseFirestore.instance
+                            .collection('item_status')
+                            .doc('1'))
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
