@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Cart.dart';
+import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/widgets/VendorItemsPage.dart'; // Import the Cart class
 
 double totalOrderPrice = 0.0;
@@ -95,13 +96,13 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           ),
                           SizedBox(height: 20),
                           Text(
-                            'Total Order Price: د.ك $totalOrderPrice',
+                            'المجموع الكلي:  د.ا$totalOrderPrice',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 10),
                           Text(
-                            'Total Quantity: $totalQuantity',
+                            'كمية الطلب: $totalQuantity',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
@@ -112,21 +113,69 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 },
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  cartItem.moveToOrders(totalOrderPrice, totalQuantity);
-                });
-              },
-              child: Text('Select Address'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+         ElevatedButton(
+  onPressed: () {
+    // Check if the total quantity is zero to determine if the cart is empty
+    if (totalQuantity == 0) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('طلب فارغ'),
+            content: Text('لا يوجد طلبات للإرسال'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('حسنا'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
               ),
-            ),
+            ],
+          );
+        },
+      );
+    } else {
+      setState(() {
+        cartItem.moveToOrders(totalOrderPrice, totalQuantity);
+      });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('تاكيد الطلب'),
+            content: Text('تم ارسال طلبك بنجاح'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('حسنا'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreen()),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  },
+  child: Text('اتمام الطلب'),
+  style: ElevatedButton.styleFrom(
+    minimumSize: Size(double.infinity, 50),
+  ),
+),
             SizedBox(height: 10),
             OutlinedButton(
-              onPressed: () {},
-              child: Text('Continue Shopping'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                );
+              },
+              child: Text('العوده الى الصفحه الرئيسيه'),
               style: OutlinedButton.styleFrom(
                 minimumSize: Size(double.infinity, 50),
               ),
@@ -185,7 +234,7 @@ class VendorContainer extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Total Price: د.ك $totalPrice',
+              'Total Price:د.ا $totalPrice',
               style: TextStyle(color: Colors.green, fontSize: 16),
             ),
           ],
