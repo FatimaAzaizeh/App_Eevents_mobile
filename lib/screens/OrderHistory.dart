@@ -1,7 +1,10 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Orders.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
 
 class OrderHistoryPage extends StatefulWidget {
   static const String screenRoute = 'OrderHistory';
@@ -12,6 +15,13 @@ class OrderHistoryPage extends StatefulWidget {
 
 class _OrderHistoryPageState extends State<OrderHistoryPage> {
   late Stream<User?> _userStream;
+  int _selectedIndex = 1; // Initially selected index for the home icon
+
+  // Global keys for tutorial
+  final GlobalKey _dashboardKey = GlobalKey();
+  final GlobalKey _homeKey = GlobalKey();
+  final GlobalKey _cartKey = GlobalKey();
+
 
   @override
   void initState() {
@@ -60,9 +70,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Order History'),
-      ),
+       appBar: AppBarEevents(),
+      
       body: StreamBuilder<User?>(
         stream: _userStream,
         builder: (context, userSnapshot) {
@@ -216,6 +225,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
           );
         },
       ),
+      
+     
     );
   }
 }
