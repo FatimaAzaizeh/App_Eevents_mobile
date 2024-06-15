@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:testtapp/Design/framApp.dart';
-import 'package:testtapp/wizard/WizardSteps.dart'; // Import WizardSteps correctly
+import 'package:testtapp/wizard/WizardSteps.dart'; // Ensure WizardSteps is correctly imported
 
 class EventItemDisplay extends StatefulWidget {
   const EventItemDisplay({
@@ -24,7 +23,7 @@ class EventItemDisplay extends StatefulWidget {
 class _EventItemDisplayState extends State<EventItemDisplay> {
   List<String> serviceNames = [];
   List<String> serviceImages = [];
-  List<DocumentReference> serviceIds = []; // Store DocumentReferences
+  List<DocumentReference> serviceIds = [];
   bool isLoading = false;
   int activeStep = 0;
   double progress = 0.2;
@@ -79,7 +78,7 @@ class _EventItemDisplayState extends State<EventItemDisplay> {
       borderRadius: BorderRadius.circular(15),
       onTap: () async {
         print('id is: ${widget.id}');
-        await fetchServiceData(widget.id.toString());
+        await fetchServiceData(widget.id);
         if (!isLoading && serviceNames.isNotEmpty && serviceImages.isNotEmpty) {
           Navigator.push(
             context,
@@ -100,7 +99,7 @@ class _EventItemDisplayState extends State<EventItemDisplay> {
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        height: 200,
+        height: 50,
         child: Column(
           children: [
             Expanded(
