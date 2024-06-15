@@ -23,6 +23,7 @@ class cartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<cartScreen> {
+  
   List<CartItem> _cartItems = [
     CartItem(
       imageUrl: 'assets/images/img_user1.png',
