@@ -115,7 +115,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                  'assets/images/event2.png',
+                  'assets/images/rrr.png',
                 ),
                 fit: BoxFit.cover,
               ),
