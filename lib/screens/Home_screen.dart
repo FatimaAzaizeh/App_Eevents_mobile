@@ -4,21 +4,24 @@ import 'package:testtapp/constants.dart';
 import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Service_screen.dart';
-import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';
-
 import 'package:testtapp/widgets/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String screenRoute = 'Home_screen';
-  const HomeScreen({Key? key}) : super(key: key);
-
+  const HomeScreen({Key? key, }) : super(key: key);
+ 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 1; // Initially selected index for the home icon
+
+  // Global keys for tutorial
+  final GlobalKey _dashboardKey = GlobalKey();
+  final GlobalKey _homeKey = GlobalKey();
+  final GlobalKey _cartKey = GlobalKey();
 
   static List<Widget> _widgetOptions = <Widget>[
     Service(), // Dashboard screen
@@ -31,6 +34,17 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
   }
+
+  bool hasSeenTutorial = false; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+   
+  }
+
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +63,17 @@ class _HomeScreenState extends State<HomeScreen> {
         items: <Widget>[
           Icon(
             Icons.dashboard,
+            key: _dashboardKey,
             color: ColorPink_100,
           ),
           Icon(
             Icons.home,
+            key: _homeKey,
             color: ColorPink_100,
           ),
           Icon(
             Icons.shopping_cart,
+            key: _cartKey,
             color: ColorPink_100,
           ),
         ],
@@ -64,3 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
+
