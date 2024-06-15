@@ -1,15 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:testtapp/widgets/VendorItemsPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:testtapp/widgets/VendorItemsPage.dart'; // Ensure the path is correct
 
-class service extends StatelessWidget {
+class Service extends StatelessWidget {
   final String id;
   final String title;
   final String imageUrl;
   final String description;
   final DocumentReference? Idevent;
 
-  const service({
+  const Service({
     Key? key,
     required this.id,
     required this.title,
@@ -22,14 +22,14 @@ class service extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        DocumentReference VendorId =
+        DocumentReference vendorId =
             FirebaseFirestore.instance.collection('vendor').doc(id);
 
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => VendorItemsPage(
-              vendorId: VendorId,
+              vendorId: vendorId,
               EventId: Idevent,
             ),
           ),
@@ -42,100 +42,75 @@ class service extends StatelessWidget {
         ),
         elevation: 7,
         margin: EdgeInsets.all(10),
-        child: Column(children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                ),
-                child: Image.network(
-                  imageUrl,
-                  height: 250,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Container(
-                height: 250,
-                alignment: Alignment.bottomRight,
-                padding: EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 20,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0),
-                      Colors.black.withOpacity(0.8),
-                    ],
-                    stops: [0.6, 1],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    height: 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.headline6,
-                  overflow: TextOverflow.fade,
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.today,
-                      color: Theme.of(context).hintColor,
-                    ),
-                    SizedBox(
-                      width: 6,
-                    ),
-                    Text(' أيام')
-                  ],
-                ),
-                Row(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.wb_sunny,
-                          color: Theme.of(context).hintColor,
-                        ),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        Text('hiii')
+                Container(
+                  height: 150,
+                  alignment: Alignment.bottomRight,
+                  padding: EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 20,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0),
+                        Colors.black.withOpacity(0.8),
                       ],
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.family_restroom,
-                          color: Theme.of(context).hintColor,
+                      stops: [0.6, 1],
+                    ),
+                  ),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.headline6?.copyWith(
+                          color: Colors.white,
                         ),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        Text('hiii')
-                      ],
-                    )
-                  ],
+                    overflow: TextOverflow.fade,
+                  ),
                 ),
               ],
             ),
-          )
-        ]),
+            
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                     Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+                
+               
+                
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
