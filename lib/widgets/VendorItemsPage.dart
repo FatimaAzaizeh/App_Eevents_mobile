@@ -25,6 +25,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
   void initState() {
     super.initState();
     getDataFromFirestore();
+    checkVendorStatus();
   }
 
   void getDataFromFirestore() async {
@@ -47,6 +48,42 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
     }
   }
 
+  Future<bool> isVendorActive(String vendorId) async {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(vendorId)
+        .get();
+    if (userSnapshot.exists) {
+      bool isActive = userSnapshot.get('active');
+      return isActive;
+    }
+    return false; // Assuming inactive if not found
+  }
+
+  void checkVendorStatus() async {
+    bool isActive = await isVendorActive(Vendor_id);
+    if (!isActive) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('المحل غير متاح'),
+            content: Text('المحل مشغول للاحظات.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: Text('حسنا'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (await canLaunch(uri.toString())) {
@@ -59,7 +96,6 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarEevents(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -98,9 +134,10 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                     .where('vendor_id', isEqualTo: widget.vendorId)
                     .where('event_type_id', isEqualTo: widget.EventId)
                     .where('item_status_id',
-                        isEqualTo: FirebaseFirestore.instance
-                            .collection('item_status')
-                            .doc('1'))
+                     isEqualTo: FirebaseFirestore.instance
+                     .collection('item_status')
+                     .doc('1')
+                    )
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -216,6 +253,42 @@ class ServiceCard extends StatelessWidget {
                           child: IconButton(
                             icon: Icon(Icons.add_shopping_cart),
                             onPressed: () {
+                              Future<bool> isVendorActive(String vendorId) async {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(vendorId)
+        .get();
+    if (userSnapshot.exists) {
+      bool isActive = userSnapshot.get('active');
+      return isActive;
+    }
+    return false; // Assuming inactive if not found
+  }
+
+  void checkVendorStatus() async {
+    bool isActive = await isVendorActive(Vendor_id);
+    if (!isActive) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('المحل غير متاح'),
+            content: Text('المحل مشغول للاحظات.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: Text('حسنا'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
                               cartItem.addItem(
                                 vendorId,
                                 itemId,
