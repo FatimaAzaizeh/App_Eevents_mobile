@@ -48,29 +48,39 @@ class _AnimatedTextPageState extends State<AnimatedTextPage> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/event.png'),
+                image: AssetImage('assets/images/rrr.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // Centered Text
+          // Centered Image and Text Overlay
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                // Use Flexible to allow the Text widget to expand
-                Flexible(
-                  child: Text(
-                    textToShow,
-                    style: TextStyle(
-                      fontSize: 90,
-                      fontFamily: 'DancingScript',
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black,
+                // Container with Image
+                Container(
+                  width: 400, // Set width as needed
+                  height: 400, // Set height as needed
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/logo.png'), // Replace with your image path
+                      fit: BoxFit.cover,
                     ),
-                    textAlign: TextAlign.center, // Center-align the text
                   ),
+                ),
+
+                // Animated Text on Top of the Image
+                Text(
+                  textToShow,
+                  style: TextStyle(
+                    fontSize: 90,
+                    fontFamily: 'DancingScript',
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
