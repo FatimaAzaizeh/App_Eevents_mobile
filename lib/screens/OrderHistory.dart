@@ -22,7 +22,6 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   final GlobalKey _homeKey = GlobalKey();
   final GlobalKey _cartKey = GlobalKey();
 
-
   @override
   void initState() {
     super.initState();
@@ -70,8 +69,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBarEevents(),
-      
+      appBar: AppBarEevents(),
       body: StreamBuilder<User?>(
         stream: _userStream,
         builder: (context, userSnapshot) {
@@ -89,7 +87,11 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                 return Center(child: CircularProgressIndicator());
               }
               if (!ordersSnapshot.hasData || ordersSnapshot.data!.isEmpty) {
-                return Center(child: Text('No orders found'));
+                return Center(
+                    child: Text(
+                  "لا توجد طلبات موجودة",
+                  style: StyleTextAdmin(16, Colors.black),
+                ));
               }
               final orders = ordersSnapshot.data!;
               return ListView.builder(
@@ -225,8 +227,6 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
           );
         },
       ),
-      
-     
     );
   }
 }

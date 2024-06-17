@@ -74,9 +74,9 @@ class UserDataBase {
 
       await users.doc(UID).update(updatedData);
 
-      return 'User information updated successfully!';
+      return 'تم تحديث معلومات المستخدم بنجاح!';
     } catch (error) {
-      return 'Error updating user information: $error';
+      return 'خطأ في تحديث معلومات المستخدم: $error';
     }
   }
 

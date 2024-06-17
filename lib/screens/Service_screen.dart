@@ -1,17 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:testtapp/screens/DisplayService.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
 import 'package:testtapp/widgets/Service_item.dart';
+import 'package:testtapp/widgets/app_drawer.dart';
 
-class Service extends StatefulWidget {
+class ServiceScreen extends StatefulWidget {
   static const String screenRoute = 'Service_screen';
-  const Service({super.key});
+  const ServiceScreen({super.key});
 
   @override
-  State<Service> createState() => _ServiceState();
+  State<ServiceScreen> createState() => _ServiceScreenState();
 }
 
-class _ServiceState extends State<Service> {
+class _ServiceScreenState extends State<ServiceScreen> {
   @override
   Widget build(BuildContext context) {
     {
@@ -51,8 +53,9 @@ class _ServiceState extends State<Service> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                DisplayService(idService: ServiceId),
+                            builder: (context) => Scaffold(
+                                appBar: AppBarEevents(),
+                                body: DisplayService(idService: ServiceId)),
                           ),
                         );
                       },

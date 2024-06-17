@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:testtapp/models/Cart.dart'; // Import your Cart model
-import 'package:testtapp/widgets/VendorItemsPage.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
+import 'package:testtapp/screens/VendorItemsPage.dart';
+import 'package:testtapp/widgets/app_drawer.dart';
 
 class ProductDetails extends StatefulWidget {
   final String itemCode;
@@ -57,7 +59,10 @@ class _ProductDetailsState extends State<ProductDetails> {
   Widget build(BuildContext context) {
     if (itemData == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Product Details')),
+        drawer: AppDrawer(
+          onItemTapped: (int) {},
+        ),
+        appBar: AppBarEevents(),
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -65,7 +70,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     var data = itemData!.data() as Map<String, dynamic>;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Product Details')),
+      appBar: AppBarEevents(),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(

@@ -7,13 +7,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:testtapp/firebase_options.dart';
 
 import 'package:testtapp/screens/AnimatedTextPage.dart';
+import 'package:testtapp/screens/Cart.dart';
 
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
 import 'package:testtapp/screens/DisplayService.dart';
 import 'package:testtapp/screens/Service_screen.dart';
-import 'package:testtapp/screens/cart_screen.dart';
 import 'package:testtapp/screens/checkout_screen.dart';
 
 import 'package:testtapp/screens/login_signup.dart';
@@ -58,9 +58,9 @@ class MyApp extends StatelessWidget {
         AnimatedTextPage.screenRoute: (context) => AnimatedTextPage(),
         LoginSignupScreen.screenRoute: (context) => LoginSignupScreen(),
         HomeScreen.screenRoute: (context) => HomeScreen(),
-        Service.screenRoute: (context) => Service(),
+        ServiceScreen.screenRoute: (context) => ServiceScreen(),
         EventScreen.screenRoute: (context) => EventScreen(),
-        cartScreen.screenRoute: (context) => cartScreen(),
+        ShoppingCartPage.screenRoute: (context) => ShoppingCartPage(),
         checkoutscreen.screenRoute: (context) => checkoutscreen(),
         OrderHistoryPage.screenRoute: (context) => OrderHistoryPage(),
         AppBarEevents.screenRoute: (context) => AppBarEevents(),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:testtapp/widgets/VendorItemsPage.dart'; // Ensure the path is correct
+import 'package:testtapp/constants.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
+import 'package:testtapp/screens/VendorItemsPage.dart';
+import 'package:testtapp/widgets/app_drawer.dart'; // Ensure the path is correct
 
 class Service extends StatelessWidget {
   final String id;
@@ -28,15 +31,18 @@ class Service extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => VendorItemsPage(
-              vendorId: vendorId,
-              EventId: Idevent,
+            builder: (context) => Scaffold(
+              appBar: AppBarEevents(),
+              body: VendorItemsPage(
+                vendorId: vendorId,
+                EventId: Idevent,
+              ),
             ),
           ),
         );
-        print('hi');
       },
       child: Card(
+        color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
@@ -77,35 +83,22 @@ class Service extends StatelessWidget {
                       stops: [0.6, 1],
                     ),
                   ),
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.headline6?.copyWith(
-                          color: Colors.white,
-                        ),
-                    overflow: TextOverflow.fade,
-                  ),
                 ),
               ],
             ),
-            
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                     Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-                
-               
-                
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      title,
+                      style: StyleTextAdmin(16, Colors.black),
+                      overflow: TextOverflow.fade,
+                    ),
+                  ),
                 ],
               ),
             ),

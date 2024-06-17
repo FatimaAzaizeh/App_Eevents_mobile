@@ -58,7 +58,7 @@ class _WizardStepsState extends State<WizardSteps> {
                   stepShape: StepShape.rRectangle,
                   stepBorderRadius: 15,
                   borderThickness: 2,
-                  stepRadius: 28,
+                  stepRadius: 33,
                   finishedStepBorderColor:
                       const Color.fromARGB(255, 248, 241, 239),
                   finishedStepTextColor: Color.fromARGB(255, 209, 205, 203),

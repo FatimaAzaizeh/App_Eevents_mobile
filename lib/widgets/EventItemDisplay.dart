@@ -1,5 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:testtapp/constants.dart';
+import 'package:testtapp/screens/Cart.dart';
+import 'package:testtapp/screens/Event_screen.dart';
+import 'package:testtapp/screens/Service_screen.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
+import 'package:testtapp/widgets/CustomBottomNavigationBar.dart';
+import 'package:testtapp/widgets/app_drawer.dart';
 import 'package:testtapp/wizard/WizardSteps.dart'; // Ensure WizardSteps is correctly imported
 
 class EventItemDisplay extends StatefulWidget {
@@ -83,15 +90,21 @@ class _EventItemDisplayState extends State<EventItemDisplay> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WizardSteps(
-                activeStep: activeStep,
-                imagePaths: serviceImages,
-                titles: serviceNames,
-                pages: serviceIds,
-                onStepTapped: (int value) {
-                  // Add your onTap logic here if needed
-                },
-                id: widget.id,
+              builder: (context) => Scaffold(
+                appBar: AppBarEevents(),
+                body: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: WizardSteps(
+                    activeStep: activeStep,
+                    imagePaths: serviceImages,
+                    titles: serviceNames,
+                    pages: serviceIds,
+                    onStepTapped: (int value) {
+                      // Add your onTap logic here if needed
+                    },
+                    id: widget.id,
+                  ),
+                ),
               ),
             ),
           );

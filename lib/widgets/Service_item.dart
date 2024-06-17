@@ -23,7 +23,7 @@ class ServiceItem extends StatelessWidget {
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        height: 200,
+        height: 180,
         child: Column(
           children: [
             Expanded(

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:testtapp/constants.dart';
+import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Home_screen.dart';
-import 'package:testtapp/screens/cart_screen.dart';
+import 'package:testtapp/widgets/AppBarEevents.dart';
+
 import 'package:testtapp/widgets/Service.dart';
 
 class DisplayService extends StatelessWidget {
@@ -78,7 +80,7 @@ class DisplayService extends StatelessWidget {
                   if (index == 0) {
                     return HomeScreen(); // Navigate to HomeScreen
                   } else {
-                    return cartScreen(); // Navigate to ShoppingCartPage
+                    return ShoppingCartPage(); // Navigate to ShoppingCartPage
                   }
                 },
               ),

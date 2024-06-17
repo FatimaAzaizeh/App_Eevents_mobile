@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:email_sender/email_sender.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Orders.dart';
 
@@ -186,47 +186,8 @@ class Cart {
 
       // Upload orders to Firebase
       await orders.uploadToFirebase();
-      for (String vendorId in vendors.keys) {
-        String vendorEmail = await getVendorEmail(vendorId);
-        if (vendorEmail != null) {
-          await sendEmail(vendorEmail);
-        }
-      }
-      // Clear cart after moving records to orders
-      clearCart();
-    } catch (error) {
-      print('Error moving records to orders: $error');
-    }
-  }
 
 // Fetch vendor email from Firestore
-  Future<String> getVendorEmail(String vendorId) async {
-    try {
-      DocumentSnapshot vendorSnapshot = await FirebaseFirestore.instance
-          .collection('vendor')
-          .doc(vendorId)
-          .get();
-      if (vendorSnapshot.exists) {
-        return vendorSnapshot['email'];
-      } else {
-        print('Vendor with ID $vendorId not found.');
-        return '';
-      }
-    } catch (error) {
-      print('Error fetching vendor email: $error');
-      return '';
-    }
-  }
-
-  Future<void> sendEmail(String email) async {
-    EmailSender emailsender = EmailSender();
-    var response = await emailsender.sendMessage(
-        "fatimaazaizeh@gmail.com", "title", "subject", "body");
-
-    if (response["message"] == "emailSendSuccess") {
-      print('SUCCESS! Email sent to $email');
-    } else {
-      print('ERROR! Failed to send email to $email: ${response["error"]}');
-    }
+    } catch (e) {}
   }
 }

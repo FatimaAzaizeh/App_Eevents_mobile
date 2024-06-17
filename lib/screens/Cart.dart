@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Cart.dart';
 import 'package:testtapp/screens/Home_screen.dart';
-import 'package:testtapp/widgets/VendorItemsPage.dart'; // Import the Cart class
+import 'package:testtapp/screens/VendorItemsPage.dart'; // Import the Cart class
 
 double totalOrderPrice = 0.0;
 int totalQuantity = 0;
@@ -113,60 +113,60 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 },
               ),
             ),
-         ElevatedButton(
-  onPressed: () {
-    // Check if the total quantity is zero to determine if the cart is empty
-    if (totalQuantity == 0) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('طلب فارغ'),
-            content: Text('لا يوجد طلبات للإرسال'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('حسنا'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      setState(() {
-        cartItem.moveToOrders(totalOrderPrice, totalQuantity);
-      });
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('تاكيد الطلب'),
-            content: Text('تم ارسال طلبك بنجاح'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('حسنا'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => HomeScreen()),
+            ElevatedButton(
+              onPressed: () {
+                // Check if the total quantity is zero to determine if the cart is empty
+                if (totalQuantity == 0) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('طلب فارغ'),
+                        content: Text('لا يوجد طلبات للإرسال'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('حسنا'),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                          ),
+                        ],
+                      );
+                    },
                   );
-                },
+                } else {
+                  setState(() {
+                    cartItem.moveToOrders(totalOrderPrice, totalQuantity);
+                  });
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('تاكيد الطلب'),
+                        content: Text('تم ارسال طلبك بنجاح'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('حسنا'),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomeScreen()),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+              child: Text('اتمام الطلب'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50),
               ),
-            ],
-          );
-        },
-      );
-    }
-  },
-  child: Text('اتمام الطلب'),
-  style: ElevatedButton.styleFrom(
-    minimumSize: Size(double.infinity, 50),
-  ),
-),
+            ),
             SizedBox(height: 10),
             OutlinedButton(
               onPressed: () {

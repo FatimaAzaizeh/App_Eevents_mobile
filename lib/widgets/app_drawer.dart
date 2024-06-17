@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:testtapp/constants.dart';
 import 'package:testtapp/screens/EditProfile.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
 import 'package:testtapp/screens/login_signup.dart';
@@ -16,25 +18,35 @@ class AppDrawer extends StatefulWidget {
 
 class _AppDrawerState extends State<AppDrawer> {
   final _auth = FirebaseAuth.instance;
-  int _selectedIndex =
-      -1; // Track the selected index, -1 means none is selected
-
-  // List of avatar images
+  int _selectedIndex = -1;
   final List<String> _avatarImages = [
     'assets/images/img_user1.png',
     'assets/images/img_user2.png',
     'assets/images/img_user3.png',
     'assets/images/img_user4.png',
-    // Add more URLs as needed
   ];
-
   late String _selectedAvatar;
+  String userName = 'Loading...';
+  String userEmail = 'Loading...';
 
   @override
   void initState() {
     super.initState();
-    // Select a random image from the list
     _selectedAvatar = _avatarImages[Random().nextInt(_avatarImages.length)];
+    fetchUserInfo();
+  }
+
+  Future<void> fetchUserInfo() async {
+    if (_auth.currentUser != null) {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .get();
+      setState(() {
+        userName = userDoc['name'];
+        userEmail = userDoc['email'];
+      });
+    }
   }
 
   @override
@@ -57,19 +69,18 @@ class _AppDrawerState extends State<AppDrawer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'userName',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    userName,
+                    style: StyleTextAdmin(
+                      20,
+                      Colors.black,
                     ),
                   ),
                   SizedBox(
                     height: 8,
                   ),
                   Text(
-                    'userEmail',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                    userEmail,
+                    style: StyleTextAdmin(16, Colors.grey),
                   ),
                 ],
               ),
@@ -87,19 +98,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   },
                   1,
                 ),
-
-                SizedBox(height: 20), // Add SizedBox here for spacing
-                buildListTile(
-                  'تسجيل الخروج',
-                  Icons.logout,
-                  () {
-                    _auth.signOut();
-                    Navigator.pushReplacementNamed(
-                        context, LoginSignupScreen.screenRoute);
-                  },
-                  3,
-                ),
-
+                SizedBox(height: 20),
                 buildListTile(
                   'اعدادات الملف الشخصي',
                   Icons.manage_accounts,
@@ -107,10 +106,19 @@ class _AppDrawerState extends State<AppDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EditUserPage(
-                            userId: _auth.currentUser!.uid.toString()),
+                        builder: (context) => EditUserPage(),
                       ),
                     );
+                  },
+                  2,
+                ),
+                buildListTile(
+                  'تسجيل الخروج',
+                  Icons.logout,
+                  () {
+                    _auth.signOut();
+                    Navigator.pushReplacementNamed(
+                        context, LoginSignupScreen.screenRoute);
                   },
                   3,
                 ),
@@ -133,18 +141,18 @@ class _AppDrawerState extends State<AppDrawer> {
         leading: Icon(
           icon,
           size: 28,
-          color: Colors.black, // Color changes based on the selection
+          color: Colors.black,
           shadows: [BoxShadow(color: Colors.black, offset: Offset(0, 2))],
         ),
         title: Text(
           title,
-          style: TextStyle(fontSize: 18, color: Colors.black),
+          style: StyleTextAdmin(14, Colors.black),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         onTap: () {
           setState(() {
-            _selectedIndex = index; // Update the selected index
+            _selectedIndex = index;
             onPress();
           });
         },

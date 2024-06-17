@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:testtapp/Alert/error.dart';
+import 'package:testtapp/Alert/success.dart';
 import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Cart.dart';
 import 'package:testtapp/models/User.dart';
@@ -28,84 +30,95 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   bool isSignupScreen = true;
   bool isMale = true;
   bool isAdmin = false;
-
   void _authenticateUser() async {
     try {
       if (isSignupScreen) {
         if (passwordSingUpController.text.length < 6) {
-          QuickAlert.show(
-            context: context,
-            text: 'كلمة السر يجب أن تكون 6 أحرف على الأقل',
-            type: QuickAlertType.error,
+          ErrorAlert(
+            context,
+            "كلمة مرور خاطئة",
+            'كلمة السر يجب أن تكون 6 أحرف على الأقل',
           );
           return;
         }
+
         final newUser = await _auth.createUserWithEmailAndPassword(
           email: emailSingUpController.text.trim(),
           password: passwordSingUpController.text,
         );
+
         if (newUser.user != null) {
           String? uid = newUser.user!.uid;
 
-          UserDataBase new_user = UserDataBase(
-              UID: uid,
-              email: emailSingUpController.text,
-              name: NameController.text,
-              user_type_id:
-                  FirebaseFirestore.instance.collection('user_types').doc('2'),
-              phone: '',
-              address: '',
-              isActive: true,
-              imageUrl: '');
-          String result = await new_user.saveToDatabase();
-          QuickAlert.show(
-            context: context,
-            text: result,
-            type: QuickAlertType.info,
+          UserDataBase newUserDatabase = UserDataBase(
+            UID: uid,
+            email: emailSingUpController.text,
+            name: NameController.text,
+            user_type_id:
+                FirebaseFirestore.instance.collection('user_types').doc('2'),
+            phone: '',
+            address: '',
+            isActive: true,
+            imageUrl: '',
+          );
+
+          String result = await newUserDatabase.saveToDatabase();
+          if (result == 'User added to the database successfully!') {
+            SuccessAlert(context, "تم تسجيل دخولك كمستخدم جديد بنجاح");
+          }
+
+          User? user = FirebaseAuth.instance.currentUser;
+          Cart cartItem = Cart(userId: user!.uid, vendors: {});
+          await cartItem.uploadToFirebase();
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
           );
         }
-        User? user = FirebaseAuth.instance.currentUser;
-        Cart cartItem = Cart(userId: user!.uid, vendors: {});
-        cartItem.uploadToFirebase();
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
       } else {
         final user = await _auth.signInWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text,
         );
+
         User? user1 = FirebaseAuth.instance.currentUser;
         Cart cartItem2 = Cart(userId: user1!.uid, vendors: {});
-        cartItem2.uploadToFirebase();
+        await cartItem2.uploadToFirebase();
+
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       }
     } catch (e) {
       print('Authentication Error: $e');
+
       if (e is FirebaseAuthException) {
         String errorMessage;
-        if (e.code == 'email-already-in-use') {
-          errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
-        } else if (e.code == 'user-not-found') {
-          errorMessage = 'البريد الإلكتروني غير مسجل';
-        } else if (e.code == 'wrong-password') {
-          errorMessage = 'كلمة السر غير صحيحة';
-        } else if (e.code == 'weak-password') {
-          errorMessage = 'كلمة السر يجب أن تكون 6 أحرف على الأقل';
-        } else {
-          errorMessage = 'حدث خطأ ما. حاول مرة أخرى.';
+        switch (e.code) {
+          case 'email-already-in-use':
+            errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
+            break;
+          case 'user-not-found':
+            errorMessage = 'البريد الإلكتروني غير مسجل';
+            break;
+          case 'wrong-password':
+            errorMessage = 'كلمة السر غير صحيحة';
+            break;
+          case 'weak-password':
+            errorMessage = 'كلمة السر يجب أن تكون 6 أحرف على الأقل';
+            break;
+          default:
+            errorMessage = 'حدث خطأ ما. حاول مرة أخرى.';
         }
-        QuickAlert.show(
-          context: context,
-          text: errorMessage,
-          type: QuickAlertType.error,
-        );
+
+        ErrorAlert(context, "خطأ", errorMessage);
       }
     }
   }
 
+  //MAIN PAGE
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,129 +127,104 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                  'assets/images/rrr.png',
-                ),
+                image: AssetImage('assets/images/rrr.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-
-          // Trick to add the shadow for the submit button
           buildBottomHalfContainer(true),
-          //Main Contianer for Login and Signup
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 200),
-            curve: Curves.bounceInOut,
-            top: isSignupScreen ? 200 : 230,
-            child: AnimatedContainer(
+          Center(
+            child: AnimatedPositioned(
               duration: Duration(milliseconds: 200),
               curve: Curves.bounceInOut,
-              height: isSignupScreen ? 380 : 250,
-              padding: EdgeInsets.all(20),
-              width: MediaQuery.of(context).size.width - 40,
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
+              top: isSignupScreen ? 200 : 230,
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                curve: Curves.bounceInOut,
+                height: isSignupScreen ? 380 : 250,
+                width: MediaQuery.of(context).size.width - 40,
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 15,
-                        spreadRadius: 5),
-                  ]),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isSignupScreen = false;
-                            });
-                          },
-                          child: Column(
-                            children: [
-                              Text(
-                                "تسجيل الدخول",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: !isSignupScreen
-                                        ? Palette.activeColor
-                                        : Palette.textColor1),
-                              ),
-                              if (!isSignupScreen)
-                                Container(
-                                  margin: EdgeInsets.only(top: 3),
-                                  height: 2,
-                                  width: 55,
-                                  color: Color.fromARGB(255, 231, 107, 128),
-                                )
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isSignupScreen = true;
-                            });
-                          },
-                          child: Column(
-                            children: [
-                              Text(
-                                "مستخدم جديد",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSignupScreen
-                                        ? Palette.activeColor
-                                        : Palette.textColor1),
-                              ),
-                              if (isSignupScreen)
-                                Container(
-                                  margin: EdgeInsets.only(top: 3),
-                                  height: 2,
-                                  width: 55,
-                                  color: Color.fromARGB(255, 231, 107, 128),
-                                )
-                            ],
-                          ),
-                        )
-                      ],
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 15,
+                      spreadRadius: 5,
                     ),
-                    if (isSignupScreen) buildSignupSection(),
-                    if (!isSignupScreen) buildSigninSection()
                   ],
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildTab("تسجيل الدخول", !isSignupScreen),
+                          _buildTab("مستخدم جديد", isSignupScreen),
+                        ],
+                      ),
+                      if (isSignupScreen) buildSignupSection(),
+                      if (!isSignupScreen) buildSigninSection(),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          // Trick to add the submit button
           buildBottomHalfContainer(false),
-          // Bottom buttons
-          Positioned(
-            top: MediaQuery.of(context).size.height - 100,
-            right: 0,
-            left: 0,
-            child: Column(
-              children: [
-                Text(isSignupScreen ? "Or Signup with" : "Or Signin with"),
-                Container(
-                  margin: EdgeInsets.only(right: 20, left: 20, top: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildTextButton(Icons.g_mobiledata, "Google",
-                          Color.fromARGB(255, 182, 103, 127)),
-                    ],
-                  ),
-                )
-              ],
+          _buildBottomButtons(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTab(String text, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isSignupScreen = text == "مستخدم جديد";
+        });
+      },
+      child: Column(
+        children: [
+          Text(
+            text,
+            style: StyleTextAdmin(
+                16, isSelected ? Palette.activeColor : AdminButton),
+          ),
+          if (isSelected)
+            Container(
+              margin: EdgeInsets.only(top: 3),
+              height: 2,
+              width: 55,
+              color: Color.fromARGB(255, 231, 107, 128),
             ),
-          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            isSignupScreen ? "أو التسجيل بواسطة" : "أو تسجيل الدخول بواسطة",
+            style: StyleTextAdmin(12, Colors.black),
+          ),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildTextButton(Icons.g_mobiledata, "Google",
+                  Color.fromARGB(255, 182, 103, 127)),
+            ],
+          ),
         ],
       ),
     );
@@ -274,12 +262,12 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
               textAlign: TextAlign.center,
               text: TextSpan(
                   text: " عند الضغط على الزر فانك موافق ",
-                  style: TextStyle(color: Palette.textColor2),
+                  style: StyleTextAdmin(10, Palette.textColor2),
                   children: [
                     TextSpan(
                       //recognizer: ,
                       text: "على الشروط و الاحكام",
-                      style: TextStyle(color: Colors.orange),
+                      style: StyleTextAdmin(10, Colors.orange),
                     ),
                   ]),
             ),
@@ -425,6 +413,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: TextField(
+        style: StyleTextAdmin(10, Colors.black),
         obscureText: isPassword,
         controller: ControllerTextField,
         keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,

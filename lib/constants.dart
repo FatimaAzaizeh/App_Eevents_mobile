@@ -26,3 +26,17 @@ const ColorCream_100 = Color.fromARGB(255, 225, 189, 158);
 Color ColorCream_70 = Color.fromARGB(255, 225, 189, 158).withOpacity(0.7);
 Color ColorCream_50 = Color.fromARGB(255, 225, 189, 158).withOpacity(0.5);
 Color ColorCream_20 = Color.fromARGB(255, 225, 189, 158).withOpacity(0.2);
+
+const AdminButton = Color.fromARGB(255, 68, 67, 67);
+TextStyle StyleTextAdmin(double SizeText, Color colorText) {
+  return TextStyle(
+      fontFamily: 'Marhey',
+      fontSize: SizeText,
+      fontWeight: FontWeight.w600,
+      color: colorText);
+}
+
+// Global keys for tutorial
+final GlobalKey _dashboardKey = GlobalKey();
+final GlobalKey _homeKey = GlobalKey();
+final GlobalKey _cartKey = GlobalKey();
