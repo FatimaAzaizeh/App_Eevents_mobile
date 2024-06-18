@@ -3,19 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 import 'package:testtapp/firebase_options.dart';
-
 import 'package:testtapp/screens/AnimatedTextPage.dart';
 import 'package:testtapp/screens/Cart.dart';
-
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
 import 'package:testtapp/screens/DisplayService.dart';
 import 'package:testtapp/screens/Service_screen.dart';
-import 'package:testtapp/screens/checkout_screen.dart';
-
 import 'package:testtapp/screens/login_signup.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';
 
@@ -61,7 +56,6 @@ class MyApp extends StatelessWidget {
         ServiceScreen.screenRoute: (context) => ServiceScreen(),
         EventScreen.screenRoute: (context) => EventScreen(),
         ShoppingCartPage.screenRoute: (context) => ShoppingCartPage(),
-        checkoutscreen.screenRoute: (context) => checkoutscreen(),
         OrderHistoryPage.screenRoute: (context) => OrderHistoryPage(),
         AppBarEevents.screenRoute: (context) => AppBarEevents(),
       },

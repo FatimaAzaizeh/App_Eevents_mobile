@@ -99,4 +99,42 @@ class UserDataBase {
       return false;
     }
   }
+
+  static Future<bool> isVendorActive(String vendorId) async {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(vendorId)
+        .get();
+    if (userSnapshot.exists) {
+      bool isActive = userSnapshot['is_active'];
+      return isActive;
+    }
+    return false;
+  }
+
+  static Future<String> fetchBusinessName(String vendorId) async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('vendor')
+          .doc(vendorId)
+          .get();
+      return snapshot.data()?['business_name'] ?? '';
+    } catch (e) {
+      print('Error fetching business name: $e');
+      return '';
+    }
+  }
+
+  static Future<bool> checkUserDataExists(String userId) async {
+    var snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    if (snapshot.exists) {
+      var data = snapshot.data();
+      return data!['address'].toString().isNotEmpty &&
+          data['phone'].toString().isNotEmpty;
+    }
+
+    return false;
+  }
 }

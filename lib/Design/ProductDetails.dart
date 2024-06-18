@@ -1,23 +1,23 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-
+import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Cart.dart'; // Import your Cart model
 import 'package:testtapp/widgets/AppBarEevents.dart';
 import 'package:testtapp/screens/VendorItemsPage.dart';
 import 'package:testtapp/widgets/app_drawer.dart';
 
+Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
+
 class ProductDetails extends StatefulWidget {
   final String itemCode;
-  final String vendorId;
-  Cart cartItem;
+  final DocumentReference vendorId;
 
   ProductDetails({
     Key? key,
     required this.itemCode,
     required this.vendorId,
-    required this.cartItem,
   }) : super(key: key);
 
   @override
@@ -26,14 +26,11 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   DocumentSnapshot? itemData;
-// Declare cartItem here
 
   @override
   void initState() {
     super.initState();
     fetchItemData();
-    // Initialize the Cart instance
-    String userId = FirebaseAuth.instance.currentUser!.uid;
   }
 
   void fetchItemData() async {
@@ -41,6 +38,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('item')
           .where('item_code', isEqualTo: widget.itemCode)
+          .where('vendor_id', isEqualTo: widget.vendorId)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -74,7 +72,8 @@ class _ProductDetailsState extends State<ProductDetails> {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SizedBox(height: 16),
             Container(
@@ -86,60 +85,72 @@ class _ProductDetailsState extends State<ProductDetails> {
             SizedBox(height: 16),
             Text(
               data['name'],
-              style: TextStyle(
-                color: Color(0xff1e2022),
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              style: StyleTextAdmin(
+                20,
+                Color(0xff1e2022),
               ),
             ),
             SizedBox(height: 8),
             Text(
-              '\$${data['price']}',
-              style: TextStyle(
-                color: Color(0xff77838f),
-                fontSize: 18,
+              '${data['price']} د.أ',
+              style: StyleTextAdmin(
+                18,
+                Colors.green,
               ),
             ),
             SizedBox(height: 8),
             Text(
               data['description'],
-              style: TextStyle(
-                color: Color(0xff77838f),
-                fontSize: 16,
+              style: StyleTextAdmin(
+                16,
+                Color(0xff77838f),
               ),
             ),
             SizedBox(height: 16),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
                   onPressed: () {
-                    setState(() {
-                      cartItem.addItem(
-                        widget.vendorId,
-                        data['item_code'].toString(),
-                        data['name'].toString(),
-                        data['image_url'].toString(),
-                        double.parse(data['price'].toString()),
-                        1,
+                    // Ensure the user is logged in before adding to cart
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              "يرجى تسجيل الدخول لإضافة المنتج إلى عربة التسوق."),
+                        ),
                       );
-                    });
+                      return;
+                    }
+
+                    // Add item to cart
+                    cartItem.addItem(
+                      widget.vendorId.id,
+                      data['item_code'].toString(),
+                      data['name'].toString(),
+                      data['image_url'].toString(),
+                      double.parse(data['price'].toString()),
+                      1,
+                    );
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${data['name']} added to the cart.'),
+                        backgroundColor: ColorPink_100,
+                        content: Text("تمت إضافة المنتج إلى عربة التسوق.",
+                            style: StyleTextAdmin(16, Colors.white)),
                       ),
                     );
                   },
                   child: Text(
-                    'Add to Bag',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+                    "أضف إلى عربة التسوق",
+                    style: StyleTextAdmin(
+                      14,
+                      Colors.white,
                     ),
                   ),
                   style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Color(0xffdd5d79)),
+                    backgroundColor: MaterialStateProperty.all(ColorPink_100),
                     padding: MaterialStateProperty.all(
                       EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                     ),

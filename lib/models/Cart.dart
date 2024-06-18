@@ -1,24 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/models/Orders.dart';
 
 class Cart {
   String userId;
-  Map<String, Map<String, dynamic>> vendors;
+  Map<String, Map<String, dynamic>>? vendors;
 
-  Cart({required this.userId, Map<String, Map<String, dynamic>>? vendors})
-      : vendors = vendors ?? {};
+  Cart({required this.userId, this.vendors});
 
   // Method to add an item to the cart
-  String addItem(String vendorId, String itemCode, String itemName,
+  void addItem(String vendorId, String itemCode, String itemName,
       String itemImage, double price, int amount) {
-    vendors.putIfAbsent(vendorId, () => {});
+    vendors ??= {};
 
-    if (vendors[vendorId]!.containsKey(itemCode)) {
-      vendors[vendorId]![itemCode]['amount'] += amount;
+    vendors!.putIfAbsent(vendorId, () => {});
+
+    // Check if the item exists in the cart
+    if (vendors![vendorId]!.containsKey(itemCode)) {
+      // Increment the amount by 1
+      vendors![vendorId]![itemCode]!['amount'] += 1;
     } else {
-      vendors[vendorId]![itemCode] = {
+      // Item does not exist in the cart, add it with initial amount
+      vendors![vendorId]![itemCode] = {
         'amount': amount,
         'item_code': itemCode,
         'item_name': itemName,
@@ -28,11 +31,10 @@ class Cart {
     }
 
     updateFirestore();
-    return 'Item added to cart.';
   }
 
   // Method to update Firestore document with cart data
-  Future<String> updateFirestore() async {
+  Future<void> updateFirestore() async {
     try {
       CollectionReference cartCollection =
           FirebaseFirestore.instance.collection('cart');
@@ -43,59 +45,58 @@ class Cart {
         'user_id': userId,
         'vendors': vendors,
       });
-      return 'Cart data updated successfully.';
     } catch (error) {
-      return 'Error updating Firestore: $error';
+      print('Error updating Firestore: $error');
     }
   }
 
-  // Method to edit an item in the cart
-  String editItem(String vendorId, String itemCode,
-      {String? itemName, String? itemImage, double? price, int? amount}) {
-    if (vendors.containsKey(vendorId) &&
-        vendors[vendorId]!.containsKey(itemCode)) {
-      if (itemName != null)
-        vendors[vendorId]![itemCode]['item_name'] = itemName;
-      if (itemImage != null)
-        vendors[vendorId]![itemCode]['item_image'] = itemImage;
-      if (price != null) vendors[vendorId]![itemCode]['price'] = price;
-      if (amount != null) vendors[vendorId]![itemCode]['amount'] = amount;
-      updateFirestore();
-      return 'Item edited successfully.';
-    } else {
-      return 'Item not found in cart.';
-    }
-  }
+// دالة لحذف عنصر من السلة
+  void deleteItem(String vendorId, String itemCode) {
+    if (vendors != null &&
+        vendors!.containsKey(vendorId) &&
+        vendors![vendorId]!.containsKey(itemCode)) {
+      vendors![vendorId]!.remove(itemCode); // حذف العنصر
 
-  // Method to delete an item from the cart
-  String deleteItem(String vendorId, String itemCode) {
-    if (vendors.containsKey(vendorId) &&
-        vendors[vendorId]!.containsKey(itemCode)) {
-      vendors[vendorId]!.remove(itemCode);
-      if (vendors[vendorId]!.isEmpty) {
-        vendors.remove(vendorId);
+      // تحقق إذا كان البائع لا يحتوي على أي عناصر بعد حذف العنصر
+      if (vendors![vendorId]!.isEmpty) {
+        vendors!
+            .remove(vendorId); // حذف مفتاح البائع إذا كان فارغاً بعد حذف العنصر
       }
-      updateFirestore();
-      return 'Item deleted from cart.';
-    } else {
-      return 'Item not found in cart.';
+
+      updateFirestore(); // تحديث Firestore بعد التعديل
     }
   }
 
   // Method to check if an item exists in the cart
   bool itemExists(String vendorId, String itemCode) {
-    return vendors.containsKey(vendorId) &&
-        vendors[vendorId]!.containsKey(itemCode);
+    return vendors != null &&
+        vendors!.containsKey(vendorId) &&
+        vendors![vendorId]!.containsKey(itemCode);
   }
 
   // Method to edit the amount of an item in the cart
-  String editItemAmount(String vendorId, String itemCode, int amount) {
+  void editItemAmount(String vendorId, String itemCode) {
     if (itemExists(vendorId, itemCode)) {
-      vendors[vendorId]![itemCode]['amount'] += amount;
+      int amount = vendors![vendorId]![itemCode]!['amount'];
+      vendors![vendorId]![itemCode]!['amount'] = amount + 1;
       updateFirestore();
-      return 'Item amount updated successfully.';
     } else {
-      return 'Item not found in cart.';
+      print('Item with vendorId: $vendorId and itemCode: $itemCode not found.');
+    }
+  }
+
+  // Method to edit the amount of an item in the cart
+  void editItemAmountSub(String vendorId, String itemCode) {
+    if (itemExists(vendorId, itemCode)) {
+      int amount = vendors![vendorId]![itemCode]!['amount'];
+      if (amount > 1) {
+        vendors![vendorId]![itemCode]!['amount'] = amount - 1;
+      } else {
+        deleteItem(vendorId, itemCode);
+      }
+      updateFirestore();
+    } else {
+      print('Item with vendorId: $vendorId and itemCode: $itemCode not found.');
     }
   }
 
@@ -105,44 +106,25 @@ class Cart {
         FirebaseFirestore.instance.collection('cart');
     try {
       DocumentReference docRef = cartCollection.doc(userId);
-      if (vendors.isNotEmpty) {
+      if (vendors != null) {
         await docRef.set({
           'user_id': userId,
           'vendors': vendors,
         });
       }
-      return 'Cart data uploaded to Firebase.';
+      return 'DocumentSnapshot added with ID: $userId';
     } catch (error) {
-      return 'Error uploading cart data: $error';
+      return 'Error adding document: $error';
     }
   }
 
-  // Method to add an item to the cart based on vendorId
-  void addItemByVendorId(String vendorId, String itemCode, String itemName,
-      String itemImage, double price, int amount) {
-    vendors.putIfAbsent(vendorId, () => {});
-
-    Map<String, dynamic> itemData = {
-      'amount': amount,
-      'item_code': itemCode,
-      'item_name': itemName,
-      'item_image': itemImage,
-      'price': price,
-    };
-
-    vendors[vendorId]![itemCode] = itemData;
-
-    updateFirestore();
-  }
-
   // Method to clear all items from the cart
-  String clearCart() {
-    vendors.clear();
+  void clearCart() {
+    vendors?.clear();
     updateFirestore();
-    return 'Cart cleared successfully.';
   }
 
-// Method to move records from cart to orders
+  // Method to move records from cart to orders
   Future<void> moveToOrders(double totalPrice, int totalItems) async {
     try {
       // Generate order ID from document ID
@@ -187,7 +169,46 @@ class Cart {
       // Upload orders to Firebase
       await orders.uploadToFirebase();
 
-// Fetch vendor email from Firestore
-    } catch (e) {}
+      // Clear cart after moving records to orders
+      clearCart();
+    } catch (error) {
+      print('Error moving records to orders: $error');
+    }
+  }
+
+  Map<String, dynamic> calculateTotalValues() {
+    double totalOrderPrice = 0.0;
+    int totalQuantity = 0;
+
+    if (vendors != null) {
+      vendors!.forEach((vendorId, vendorData) {
+        vendorData.forEach((itemCode, itemData) {
+          double price = itemData['price'] ?? 0.0;
+          int amount = itemData['amount'] ?? 0;
+          totalOrderPrice += price * amount;
+          totalQuantity += amount;
+        });
+      });
+    }
+
+    return {
+      'totalOrderPrice': totalOrderPrice,
+      'totalQuantity': totalQuantity,
+    };
+  }
+
+  // Method to calculate total price asynchronously
+  Future<double> calculateTotalPrice() async {
+    double totalPrice = 0.0;
+    if (vendors != null) {
+      vendors!.forEach((vendorId, vendorData) {
+        vendorData.forEach((itemCode, itemData) {
+          double price = itemData['price'] ?? 0.0;
+          int amount = itemData['amount'] ?? 0;
+          totalPrice += price * amount;
+        });
+      });
+    }
+    return totalPrice;
   }
 }

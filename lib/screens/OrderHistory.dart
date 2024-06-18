@@ -1,9 +1,12 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'dart:ui'; // Import dart:ui for MediaQuery
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Orders.dart';
+import 'package:testtapp/models/User.dart';
+import 'package:testtapp/screens/VendorItemsPage.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';
 
 class OrderHistoryPage extends StatefulWidget {
@@ -15,12 +18,6 @@ class OrderHistoryPage extends StatefulWidget {
 
 class _OrderHistoryPageState extends State<OrderHistoryPage> {
   late Stream<User?> _userStream;
-  int _selectedIndex = 1; // Initially selected index for the home icon
-
-  // Global keys for tutorial
-  final GlobalKey _dashboardKey = GlobalKey();
-  final GlobalKey _homeKey = GlobalKey();
-  final GlobalKey _cartKey = GlobalKey();
 
   @override
   void initState() {
@@ -38,23 +35,26 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
               return Orders(
                 orderId: data['order_id'],
                 userId: data['user_id'],
-                vendors:
-                    (data['vendors'] as Map<String, dynamic>).map((key, value) {
-                  return MapEntry(
-                    key,
-                    value as Map<String, dynamic>,
-                  );
-                }),
+                vendors: (data['vendors'] as Map<String, dynamic>).map(
+                  (key, value) {
+                    return MapEntry(
+                      key,
+                      value as Map<String, dynamic>,
+                    );
+                  },
+                ),
                 totalPrice: data['total_price'],
                 totalItems: data['total_items'],
               );
             }).toList());
   }
 
-  Future<String> _fetchItemImage(String itemCode) async {
+  Future<String> _fetchItemImage(
+      String itemCode, DocumentReference vendorId) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('item')
         .where('item_code', isEqualTo: itemCode)
+        .where('vendor_id', isEqualTo: vendorId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -68,6 +68,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch screen size
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBarEevents(),
       body: StreamBuilder<User?>(
@@ -88,140 +91,219 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
               }
               if (!ordersSnapshot.hasData || ordersSnapshot.data!.isEmpty) {
                 return Center(
-                    child: Text(
-                  "لا توجد طلبات موجودة",
-                  style: StyleTextAdmin(16, Colors.black),
-                ));
+                  child: Text(
+                    "لا توجد طلبات موجودة",
+                    style: StyleTextAdmin(16, Colors.black),
+                  ),
+                );
               }
               final orders = ordersSnapshot.data!;
-              return ListView.builder(
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  final order = orders[index];
-                  return Card(
-                    margin: EdgeInsets.all(10),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Order ID: ${order.orderId}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(screenSize.width * 0.03),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: orders.map((order) {
+                    return Card(
+                      surfaceTintColor: Colors.white,
+                      color: Color.fromARGB(255, 255, 229, 231),
+                      margin: EdgeInsets.symmetric(
+                          vertical: screenSize.width * 0.03),
+                      child: Padding(
+                        padding: EdgeInsets.all(screenSize.width * 0.04),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'رقم الطلب: ${order.orderId}',
+                              style: StyleTextAdmin(
+                                  screenSize.width * 0.035, Colors.black),
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Total Price: د.ك ${order.totalPrice.toStringAsFixed(2)}',
-                          ),
-                          SizedBox(height: 8),
-                          Text('Total Items: ${order.totalItems}'),
-                          SizedBox(height: 8),
-                          ...order.vendors.entries.map((vendorEntry) {
-                            final vendorId = vendorEntry.key;
-                            final vendorData = vendorEntry.value;
-                            final orderStatusId = vendorData['order_status_id']
-                                as DocumentReference;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Vendor: $vendorId'),
-                                StreamBuilder<DocumentSnapshot>(
-                                  stream: orderStatusId.snapshots(),
-                                  builder: (context, statusSnapshot) {
-                                    if (statusSnapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return CircularProgressIndicator();
-                                    }
-                                    final orderStatusData =
-                                        statusSnapshot.data?.get('description');
-                                    final orderStatus =
-                                        orderStatusData.toString();
-                                    return Text('Order Status: $orderStatus');
-                                  },
-                                ),
-                                ...vendorData['vendor_id_items']
-                                    .entries
-                                    .map((itemEntry) {
-                                  final itemData = itemEntry.value;
-                                  final itemCode = itemData['item_code'];
-                                  return FutureBuilder<String>(
-                                    future: _fetchItemImage(itemCode),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                      final itemImage = snapshot.data ?? '';
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 4.0),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 80,
-                                              height: 80,
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: Colors.grey,
+                            SizedBox(height: screenSize.height * 0.01),
+                            Text(
+                              'السعر الإجمالي : ${order.totalPrice.toStringAsFixed(2)} د,إ',
+                              style: StyleTextAdmin(
+                                  screenSize.width * 0.03, Colors.green),
+                            ),
+                            SizedBox(height: screenSize.height * 0.01),
+                            Text(
+                              'عدد العناصر الإجمالي: ${order.totalItems}',
+                              style: StyleTextAdmin(
+                                  screenSize.width * 0.03, AdminButton),
+                            ),
+                            SizedBox(height: screenSize.height * 0.01),
+                            ...order.vendors.entries.map((vendorEntry) {
+                              final vendorId = vendorEntry.key;
+                              return FutureBuilder<String>(
+                                future:
+                                    UserDataBase.fetchBusinessName(vendorId),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  }
+                                  final businessName = snapshot.data ?? '';
+                                  final vendorData = vendorEntry.value;
+                                  final orderStatusId =
+                                      vendorData['order_status_id']
+                                          as DocumentReference;
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'البائع: $businessName',
+                                        style: StyleTextAdmin(
+                                            screenSize.width * 0.03,
+                                            AdminButton),
+                                      ),
+                                      StreamBuilder<DocumentSnapshot>(
+                                        stream: orderStatusId.snapshots(),
+                                        builder: (context, statusSnapshot) {
+                                          if (statusSnapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return CircularProgressIndicator();
+                                          }
+                                          final orderStatusData = statusSnapshot
+                                              .data
+                                              ?.get('description');
+                                          final orderStatus =
+                                              orderStatusData.toString();
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 4, bottom: 4),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(4.0),
+                                                child: Text(
+                                                  'حالة الطلب: $orderStatus',
+                                                  style: StyleTextAdmin(
+                                                      screenSize.width * 0.035,
+                                                      getColorForOrderStatus(
+                                                          orderStatus)),
                                                 ),
                                               ),
-                                              child: itemImage.isNotEmpty
-                                                  ? Image.network(
-                                                      itemImage,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                          error, stackTrace) {
-                                                        return Center(
-                                                          child: Text(
-                                                            'Image\nnot found',
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                        );
-                                                      },
-                                                    )
-                                                  : Center(
-                                                      child: Text('No Image'),
-                                                    ),
                                             ),
-                                            SizedBox(width: 16),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                          );
+                                        },
+                                      ),
+                                      ...vendorData['vendor_id_items']
+                                          .entries
+                                          .map((itemEntry) {
+                                        final itemData = itemEntry.value;
+                                        final itemCode = itemData['item_code'];
+                                        return FutureBuilder<String>(
+                                          future: _fetchItemImage(
+                                              itemCode,
+                                              FirebaseFirestore.instance
+                                                  .collection("vendor")
+                                                  .doc(vendorId)),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            }
+                                            final itemImage =
+                                                snapshot.data ?? '';
+                                            return Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical:
+                                                      screenSize.height * 0.01),
+                                              child: Row(
                                                 children: [
-                                                  Text(
-                                                    itemData['item_name'],
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                  Container(
+                                                    width:
+                                                        screenSize.width * 0.2,
+                                                    height:
+                                                        screenSize.width * 0.2,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.grey),
+                                                    ),
+                                                    child: itemImage.isNotEmpty
+                                                        ? Image.network(
+                                                            itemImage,
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder:
+                                                                (context, error,
+                                                                    stackTrace) {
+                                                              return Center(
+                                                                child: Text(
+                                                                  'الصورة\nغير موجودة',
+                                                                  style: StyleTextAdmin(
+                                                                      screenSize
+                                                                              .width *
+                                                                          0.02,
+                                                                      AdminButton),
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                ),
+                                                              );
+                                                            },
+                                                          )
+                                                        : Center(
+                                                            child: Text(
+                                                              "لا توجد صورة",
+                                                              style: StyleTextAdmin(
+                                                                  screenSize
+                                                                          .width *
+                                                                      0.02,
+                                                                  AdminButton),
+                                                            ),
+                                                          ),
+                                                  ),
+                                                  SizedBox(
+                                                      width: screenSize.width *
+                                                          0.04),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          itemData['item_name'],
+                                                          style: StyleTextAdmin(
+                                                              screenSize.width *
+                                                                  0.035,
+                                                              Colors.black),
+                                                        ),
+                                                        SizedBox(
+                                                            height: screenSize
+                                                                    .height *
+                                                                0.01),
+                                                        Text(
+                                                          'الكمية: ${itemData['amount']}',
+                                                          style: StyleTextAdmin(
+                                                              screenSize.width *
+                                                                  0.03,
+                                                              Colors.black),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
-                                                  SizedBox(height: 8),
-                                                  Text(
-                                                      'Quantity: ${itemData['amount']}'),
                                                 ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
+                                            );
+                                          },
+                                        );
+                                      }).toList(),
+                                    ],
                                   );
-                                }).toList(),
-                              ],
-                            );
-                          }).toList(),
-                        ],
+                                },
+                              );
+                            }).toList(),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  }).toList(),
+                ),
               );
             },
           );

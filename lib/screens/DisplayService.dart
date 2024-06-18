@@ -32,7 +32,11 @@ class DisplayService extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No data available'));
+            return Center(
+                child: Text(
+              "لا يوجد مزودي خدمات لهذه الخدمة",
+              style: StyleTextAdmin(16, Colors.black),
+            ));
           }
           return ListView.builder(
             itemBuilder: (ctx, index) {
@@ -51,43 +55,6 @@ class DisplayService extends StatelessWidget {
             itemCount: snapshot.data!.docs.length,
           );
         },
-      ),
-      bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: ColorPink_20,
-        color: Colors.white,
-        animationDuration: Duration(milliseconds: 300),
-        items: <Widget>[
-          Icon(
-            Icons.dashboard,
-            color: ColorPink_100,
-          ),
-          Icon(
-            Icons.home,
-            color: ColorPink_100,
-          ),
-          Icon(
-            Icons.shopping_cart,
-            color: ColorPink_100,
-          ),
-        ],
-        onTap: (index) {
-          // Handle bottom navigation tap
-          if (index != 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  if (index == 0) {
-                    return HomeScreen(); // Navigate to HomeScreen
-                  } else {
-                    return ShoppingCartPage(); // Navigate to ShoppingCartPage
-                  }
-                },
-              ),
-            );
-          }
-        },
-        index: 1, // Set the default selected index
       ),
     );
   }

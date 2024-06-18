@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testtapp/Alert/error.dart';
+import 'package:testtapp/Alert/success.dart';
+import 'package:testtapp/Design/ProductDetails.dart';
+import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Cart.dart';
+import 'package:testtapp/models/User.dart';
+import 'package:testtapp/screens/EditProfile.dart';
 import 'package:testtapp/screens/Home_screen.dart';
-import 'package:testtapp/screens/VendorItemsPage.dart'; // Import the Cart class
+import 'package:testtapp/screens/VendorItemsPage.dart';
 
-double totalOrderPrice = 0.0;
-int totalQuantity = 0;
+FirebaseAuth auth = FirebaseAuth.instance;
 
 class ShoppingCartPage extends StatefulWidget {
   static const String screenRoute = 'Cart';
@@ -16,20 +21,39 @@ class ShoppingCartPage extends StatefulWidget {
 }
 
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
+  double totalOrderPrice = 0.0;
+  int totalQuantity = 0;
+
+  void updateTotals(Map<String, dynamic> vendors) {
+    double newTotalOrderPrice = 0.0;
+    int newTotalQuantity = 0;
+
+    vendors.values.forEach((items) {
+      items.forEach((_, itemData) {
+        newTotalOrderPrice +=
+            (itemData['price'] ?? 0.0) * (itemData['amount'] ?? 0);
+        newTotalQuantity += (itemData['amount'] ?? 0) as int;
+      });
+    });
+
+    if (totalOrderPrice != newTotalOrderPrice ||
+        totalQuantity != newTotalQuantity) {
+      setState(() {
+        totalOrderPrice = newTotalOrderPrice;
+        totalQuantity = newTotalQuantity;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(screenSize.width * 0.04),
         child: Column(
           children: [
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                // Call method to clear cart
-                cartItem.clearCart();
-              },
-            ),
             Expanded(
               child: FutureBuilder<User?>(
                 future: FirebaseAuth.instance.authStateChanges().first,
@@ -43,7 +67,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   final userId = snapshot.data!.uid;
                   return StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('cart')
+                        .collection("cart")
                         .doc(userId)
                         .snapshots(),
                     builder: (context, snapshot) {
@@ -51,133 +75,144 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         return Center(child: CircularProgressIndicator());
                       }
                       if (!snapshot.hasData || !snapshot.data!.exists) {
-                        return Center(child: Text('No items in the cart'));
+                        return Center(
+                          child: Text(
+                            'لا توجد عناصر في السلة',
+                            style: StyleTextAdmin(
+                              screenSize.width * 0.04,
+                              Colors.black,
+                            ),
+                          ),
+                        );
                       }
 
                       final Map<String, dynamic>? cartData =
                           snapshot.data!.data() as Map<String, dynamic>?;
                       if (cartData == null) {
-                        return Center(child: Text('No items in the cart'));
+                        return Center(
+                          child: Text(
+                            'لا توجد عناصر في السلة',
+                            style: StyleTextAdmin(
+                              screenSize.width * 0.04,
+                              Colors.black,
+                            ),
+                          ),
+                        );
                       }
 
                       final Map<String, dynamic>? vendors = cartData['vendors'];
                       if (vendors == null || vendors.isEmpty) {
-                        return Center(child: Text('No items in the cart'));
-                      }
-
-                      // Calculate total order price and total quantity
-                      totalOrderPrice = 0.0;
-                      totalQuantity = 0;
-                      vendors.values.forEach((items) {
-                        items.forEach((_, itemData) {
-                          totalOrderPrice += (itemData['price'] ?? 0.0) *
-                              (itemData['amount'] ?? 0);
-                          totalQuantity += (itemData['amount'] ?? 0) as int;
-                        });
-                      });
-
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: vendors.length,
-                              itemBuilder: (context, index) {
-                                final vendorId = vendors.keys.elementAt(index);
-                                final items =
-                                    vendors[vendorId] as Map<String, dynamic>;
-
-                                return VendorContainer(
-                                  vendorId: vendorId,
-                                  items: items,
-                                  userId: userId,
-                                );
-                              },
+                        return Center(
+                          child: Text(
+                            'لا توجد عناصر في السلة',
+                            style: StyleTextAdmin(
+                              screenSize.width * 0.04,
+                              Colors.black,
                             ),
                           ),
-                          SizedBox(height: 20),
-                          Text(
-                            'المجموع الكلي:  د.ا$totalOrderPrice',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            'كمية الطلب: $totalQuantity',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                        );
+                      }
+
+                      // Update totals when data changes
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        updateTotals(vendors);
+                      });
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: vendors.length,
+                        itemBuilder: (context, index) {
+                          final String vendorId = vendors.keys.elementAt(index);
+
+                          final items =
+                              vendors[vendorId] as Map<String, dynamic>;
+
+                          return VendorContainer(
+                            vendorId: vendorId,
+                            items: items,
+                            userId: userId,
+                            onItemChanged: () => updateTotals(vendors),
+                          );
+                        },
                       );
                     },
                   );
                 },
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                // Check if the total quantity is zero to determine if the cart is empty
-                if (totalQuantity == 0) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('طلب فارغ'),
-                        content: Text('لا يوجد طلبات للإرسال'),
-                        actions: <Widget>[
-                          TextButton(
-                            child: Text('حسنا'),
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  setState(() {
-                    cartItem.moveToOrders(totalOrderPrice, totalQuantity);
-                  });
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('تاكيد الطلب'),
-                        content: Text('تم ارسال طلبك بنجاح'),
-                        actions: <Widget>[
-                          TextButton(
-                            child: Text('حسنا'),
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomeScreen()),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              child: Text('اتمام الطلب'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+            Container(
+              padding: EdgeInsets.all(screenSize.width * 0.04),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Colors.grey, width: 0.5),
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
-                );
-              },
-              child: Text('العوده الى الصفحه الرئيسيه'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+              child: Column(
+                children: [
+                  Text(
+                    'المجموع الكلي:  د.ا$totalOrderPrice',
+                    style:
+                        StyleTextAdmin(screenSize.width * 0.04, Colors.black),
+                  ),
+                  SizedBox(height: screenSize.height * 0.01),
+                  Text(
+                    'كمية الطلب: $totalQuantity',
+                    style:
+                        StyleTextAdmin(screenSize.width * 0.04, Colors.black),
+                  ),
+                  SizedBox(height: screenSize.height * 0.02),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Check if the total quantity is zero to determine if the cart is empty
+                      if (totalQuantity == 0) {
+                        ErrorAlert(
+                          context,
+                          'طلب فارغ',
+                          'لا يوجد طلبات للإرسال',
+                        );
+                      } else {
+                        bool userDataExists =
+                            await UserDataBase.checkUserDataExists(
+                                auth.currentUser!.uid);
+                        if (userDataExists) {
+                          cartItem.moveToOrders(totalOrderPrice, totalQuantity);
+                          setState(() {
+                            totalOrderPrice = 0;
+                            totalQuantity = 0;
+                          });
+                          SuccessAlert(
+                            context,
+                            'تم ارسال طلبك بنجاح',
+                          );
+                        } else {
+                          ErrorAlert(
+                            context,
+                            "معلومات ناقصة",
+                            "يرجى ملء جميع الحقول للمتابعة.",
+                          );
+                          await Future.delayed(
+                              Duration(seconds: 2)); // Wait for 2 seconds
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditUserPage(),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Text(
+                      'اتمام الطلب',
+                      style: StyleTextAdmin(16, Colors.black),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorPink_100,
+                      minimumSize:
+                          Size(double.infinity, screenSize.height * 0.06),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -191,13 +226,18 @@ class VendorContainer extends StatelessWidget {
   final String vendorId;
   final Map<String, dynamic> items;
   final String userId;
+  final VoidCallback onItemChanged;
 
-  VendorContainer(
-      {required this.vendorId, required this.items, required this.userId});
+  VendorContainer({
+    required this.vendorId,
+    required this.items,
+    required this.userId,
+    required this.onItemChanged,
+  });
 
-  double calculateTotalPrice() {
+  Future<double> calculateTotalPrice() async {
     double totalPrice = 0.0;
-    items.forEach((itemCode, itemData) {
+    await Future.forEach(items.values, (itemData) {
       totalPrice += itemData['price'] * itemData['amount'];
     });
     return totalPrice;
@@ -205,54 +245,79 @@ class VendorContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double totalPrice = calculateTotalPrice();
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Vendor: $vendorId',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    Size screenSize = MediaQuery.of(context).size;
+
+    return FutureBuilder<double>(
+      future: calculateTotalPrice(),
+      builder: (context, snapshot) {
+        double totalPrice = snapshot.data ?? 0.0;
+
+        // Calculate card width as 80% of screen width
+        double cardWidth = screenSize.width * 0.8;
+
+        return Card(
+          surfaceTintColor: Colors.white,
+          color: Color.fromARGB(255, 255, 229, 231),
+          margin: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
+          child: Container(
+            width: cardWidth,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder<String>(
+                    future: UserDataBase.fetchBusinessName(vendorId),
+                    builder: (context, snapshot) {
+                      String businessName = snapshot.data ?? '';
+
+                      return Text(
+                        'البائع: $businessName',
+                        style: StyleTextAdmin(
+                            screenSize.width * 0.0352, AdminButton),
+                      );
+                    },
+                  ),
+                  Column(
+                    children: items.entries.map((entry) {
+                      final itemData = entry.value as Map<String, dynamic>;
+                      return CartItem(
+                        userId: userId,
+                        vendorId: vendorId,
+                        itemCode: entry.key,
+                        title: itemData['item_name'],
+                        quantity: itemData['amount'],
+                        price: itemData['price'],
+                        imageUrl: itemData['item_image'],
+                        onItemChanged: onItemChanged,
+                      );
+                    }).toList(),
+                  ),
+                  Text(
+                    'السعر الإجمالي : ${totalPrice.toStringAsFixed(2)} د,إ',
+                    style:
+                        StyleTextAdmin(screenSize.width * 0.03, Colors.green),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 10),
-            Column(
-              children: items.entries.map((entry) {
-                final itemData = entry.value as Map<String, dynamic>;
-                return CartItem(
-                  userId: userId,
-                  vendorId: vendorId,
-                  itemCode: entry.key,
-                  title: itemData['item_name'],
-                  quantity: itemData['amount'],
-                  price: itemData['price'],
-                  imageUrl: itemData['item_image'],
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Total Price:د.ا $totalPrice',
-              style: TextStyle(color: Colors.green, fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
-class CartItem extends StatelessWidget {
+class CartItem extends StatefulWidget {
   final String userId;
   final String vendorId;
   final String itemCode;
   final String title;
-
   final int quantity;
   final double price;
   final String imageUrl;
+  final VoidCallback onItemChanged;
 
   CartItem({
     required this.userId,
@@ -262,96 +327,94 @@ class CartItem extends StatelessWidget {
     required this.quantity,
     required this.price,
     required this.imageUrl,
+    required this.onItemChanged,
   });
 
-  void _updateItemAmount(int amount) {
-    FirebaseFirestore.instance.collection('cart').doc(userId).update({
-      'vendors.$vendorId.$itemCode.amount': amount,
-    }).catchError((error) {
-      print('Error updating item amount: $error');
-    });
-  }
+  @override
+  State<CartItem> createState() => _CartItemState();
+}
 
-  void _deleteItem() {
-    FirebaseFirestore.instance.collection('cart').doc(userId).update({
-      'vendors.$vendorId.$itemCode': FieldValue.delete(),
-    }).catchError((error) {
-      print('Error deleting item: $error');
-    });
+class _CartItemState extends State<CartItem> {
+  int quantity;
+
+  _CartItemState() : quantity = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    quantity = widget.quantity;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-            ),
-            child: imageUrl.isNotEmpty
-                ? Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(
-                        child: Text(
-                          'Image\nnot found',
-                          textAlign: TextAlign.center,
-                        ),
-                      );
+    Size screenSize = MediaQuery.of(context).size;
+
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Image.network(
+            widget.imageUrl,
+            width: screenSize.width * 0.15,
+            height: screenSize.height * 0.15,
+          ),
+          title: Text(
+            widget.title,
+            style: StyleTextAdmin(screenSize.width * 0.035, Colors.black),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    color: Colors.black,
+                    icon: Icon(Icons.remove, size: screenSize.width * 0.06),
+                    onPressed: () {
+                      setState(() {
+                        cartItem.editItemAmountSub(
+                            widget.vendorId, widget.itemCode);
+                        widget.onItemChanged();
+                      });
                     },
-                  )
-                : Center(child: Text('No Image')),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.remove),
-                      onPressed: () {
-                        if (quantity > 1) {
-                          _updateItemAmount(quantity - 1);
-                        }
-                      },
+                  ),
+                  Text(
+                    ' $quantity',
+                    style: StyleTextAdmin(screenSize.width * 0.03, AdminButton),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      color: Colors.black,
+                      Icons.add,
+                      size: screenSize.width * 0.06,
                     ),
-                    Text('عدد المنتجات: $quantity'),
-                    IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: () {
-                        _updateItemAmount(quantity + 1);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteItem();
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    onPressed: () {
+                      setState(() {
+                        cartItem.editItemAmount(
+                            widget.vendorId, widget.itemCode);
+                        widget.onItemChanged();
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Text(
+                'السعر: ${widget.price.toStringAsFixed(2)} د.إ',
+                style: StyleTextAdmin(screenSize.width * 0.03, Colors.black),
+              ),
+            ],
           ),
-          Text(
-            'د.ا $price',
-            style: TextStyle(fontSize: 16, color: Colors.green),
+          trailing: IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              setState(() {
+                cartItem.deleteItem(widget.vendorId, widget.itemCode);
+                widget.onItemChanged();
+              });
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

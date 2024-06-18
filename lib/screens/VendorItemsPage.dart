@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:testtapp/Design/item_design.dart';
+import 'package:testtapp/Design/ProductDetails.dart';
 import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Cart.dart'; // Import the Cart class
+import 'package:testtapp/models/User.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 String Vendor_id = '';
 String vendorUrl = '';
 String VendorName = '';
-Cart cartItem = Cart(userId: FirebaseAuth.instance.currentUser!.uid);
+
+bool is_active = false; // Initialize is_active as false initially
 
 class VendorItemsPage extends StatefulWidget {
   final DocumentReference vendorId;
   final DocumentReference? EventId;
+
   VendorItemsPage({required this.vendorId, this.EventId});
 
   @override
@@ -22,16 +25,14 @@ class VendorItemsPage extends StatefulWidget {
 }
 
 class _VendorItemsPageState extends State<VendorItemsPage> {
-  get vendorId => null;
-
   @override
   void initState() {
     super.initState();
     getDataFromFirestore();
-    checkVendorStatus();
   }
 
-  void getDataFromFirestore() async {
+  Future<void> getDataFromFirestore() async {
+    // Fetch vendor details and set state
     DocumentSnapshot documentSnapshot = await widget.vendorId.get();
     if (documentSnapshot.exists) {
       Vendor_id = documentSnapshot.get('UID');
@@ -41,52 +42,16 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
           .get();
 
       if (vendorDoc.exists) {
-        vendorUrl =
-            vendorDoc['location_url']; // Assuming 'url' is the field name
+        vendorUrl = vendorDoc['location_url'];
         VendorName = vendorDoc['business_name'];
+        is_active = await UserDataBase.isVendorActive(
+            Vendor_id); // Assuming 'is_active' field exists in vendorDoc
         setState(() {});
       } else {
-        print('Document does not exist');
+        print('Vendor document does not exist');
       }
-    }
-  }
-
-  Future<bool> isVendorActive(String vendorId) async {
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(vendorId)
-        .get();
-    if (userSnapshot.exists) {
-      bool isActive = userSnapshot.get('active');
-      return isActive;
-    }
-    return false; // Assuming inactive if not found
-  }
-
-  void checkVendorStatus() async {
-    bool isActive = await isVendorActive(Vendor_id);
-    if (!isActive) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(
-              'المحل غير متاح',
-              style: StyleTextAdmin(14, Colors.black),
-            ),
-            content: Text('المحل مشغول للاحظات.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                },
-                child: Text('حسنا'),
-              ),
-            ],
-          );
-        },
-      );
+    } else {
+      print('Document does not exist');
     }
   }
 
@@ -98,7 +63,6 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
       throw 'Could not launch $url';
     }
   }
-  //MAIN PAGE
 
   @override
   Widget build(BuildContext context) {
@@ -107,56 +71,45 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  VendorName,
-                  style: StyleTextAdmin(28, Colors.black),
-                ),
-                FloatingActionButton(
-                  backgroundColor: ColorPink_50,
-                  onPressed: () {
-                    _showWorkingHoursAlertDialog(context, vendorId);
-                  },
-                  child: Tooltip(
-                    decoration: BoxDecoration(color: Colors.white),
-                    textStyle: StyleTextAdmin(12, ColorPurple_100),
-                    message: "عرض ساعات عمل المتجر",
-                    child: Icon(
-                      Icons.access_time,
-                      color: Colors.black,
-                    ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    VendorName,
+                    style: StyleTextAdmin(28, Colors.black),
                   ),
-                ),
-                FloatingActionButton(
-                  backgroundColor: ColorPink_50,
-                  onPressed: () {
-                    if (vendorUrl.isNotEmpty) {
-                      _launchURL(vendorUrl);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "رابط البائع غير متاح.",
-                            style: StyleTextAdmin(12, AdminButton),
+                  FloatingActionButton(
+                    backgroundColor: ColorPink_100,
+                    onPressed: () {
+                      if (vendorUrl.isNotEmpty) {
+                        _launchURL(vendorUrl);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.white,
+                            content: Text(
+                              'الرابط الخاص بالبائع غير متوفر.',
+                              style: StyleTextAdmin(16, ColorPink_100),
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  child: Tooltip(
-                    decoration: BoxDecoration(color: Colors.white),
-                    textStyle: StyleTextAdmin(12, ColorPurple_100),
-                    message: "عرض موقع البائع",
-                    child: Icon(
-                      Icons.location_on,
-                      color: Colors.black,
+                        );
+                      }
+                    },
+                    child: Tooltip(
+                      textStyle: StyleTextAdmin(14, ColorPink_100),
+                      decoration: BoxDecoration(color: Colors.white),
+                      message: "عرض موقع البائع",
+                      child: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -171,7 +124,11 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return Center(child: Text('Something went wrong'));
+                    return Center(
+                        child: Text(
+                      "حدث خطأ ما.",
+                      style: StyleTextAdmin(16, Colors.red),
+                    ));
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -183,7 +140,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                   if (data.size == 0) {
                     return Center(
                         child: Text(
-                      "لم يتم العثور على أي عناصر لهذا البائع.",
+                      "لا توجد عناصر متاحة لهذا البائع.",
                       style: StyleTextAdmin(16, Colors.black),
                     ));
                   }
@@ -199,7 +156,7 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                             ? item['price'].toDouble()
                             : item['price'],
                         imageUrl: item['image_url'],
-                        vendorId: Vendor_id,
+                        vendorId: widget.vendorId,
                         itemId: item['item_code'],
                       );
                     },
@@ -207,6 +164,27 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                 },
               ),
             ),
+            // Render FloatingActionButton based on is_active status
+            if (!is_active)
+              Container(
+                width: MediaQuery.sizeOf(context).width * 0.45,
+                margin: EdgeInsets.only(bottom: 90),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: const Color.fromARGB(165, 255, 255, 255)
+                          .withOpacity(0.3),
+                      width: 2),
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.grey.withOpacity(0.7),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "المحل غير متاح حاليا",
+                    style: StyleTextAdmin(18, Colors.white),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -219,7 +197,7 @@ class ServiceCard extends StatelessWidget {
   final double price;
   final String imageUrl;
 
-  final String vendorId;
+  final DocumentReference vendorId;
   final String itemId;
 
   ServiceCard({
@@ -239,8 +217,7 @@ class ServiceCard extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => ProductDetails(
               itemCode: itemId,
-              vendorId: Vendor_id,
-              cartItem: cartItem,
+              vendorId: vendorId,
             ),
           ),
         );
@@ -278,70 +255,30 @@ class ServiceCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: Icon(Icons.add_shopping_cart),
-                            onPressed: () {
-                              Future<bool> isVendorActive(
-                                  String vendorId) async {
-                                DocumentSnapshot userSnapshot =
-                                    await FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(vendorId)
-                                        .get();
-                                if (userSnapshot.exists) {
-                                  bool isActive = userSnapshot.get('active');
-                                  return isActive;
-                                }
-                                return false; // Assuming inactive if not found
-                              }
+                        IconButton(
+                          icon: Icon(Icons.add_shopping_cart),
+                          onPressed: is_active
+                              ? () {
+                                  cartItem.addItem(
+                                    Vendor_id,
+                                    itemId,
+                                    title,
+                                    imageUrl,
+                                    price,
+                                    1,
+                                  );
 
-                              void checkVendorStatus() async {
-                                bool isActive = await isVendorActive(Vendor_id);
-                                if (!isActive) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text(
-                                          'المحل غير متاح',
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: ColorPink_100,
+                                      content: Text(
+                                          'تمت إضافة المنتج إلى عربة التسوق.',
                                           style:
-                                              StyleTextAdmin(14, AdminButton),
-                                        ),
-                                        content: Text(
-                                          'المحل مشغول للاحظات.',
-                                          style:
-                                              StyleTextAdmin(14, AdminButton),
-                                        ),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text(
-                                              'حسنا',
-                                              style: StyleTextAdmin(
-                                                  15, Colors.black),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                              StyleTextAdmin(16, Colors.white)),
+                                    ),
                                   );
                                 }
-                              }
-
-                              cartItem.addItem(
-                                vendorId,
-                                itemId,
-                                title,
-                                imageUrl,
-                                price,
-                                1,
-                              );
-                            },
-                          ),
+                              : null,
                         ),
                       ],
                     ),
@@ -354,118 +291,4 @@ class ServiceCard extends StatelessWidget {
       ),
     );
   }
-}
-
-void _showWorkingHoursAlertDialog(BuildContext context, String vendorId) async {
-  final _firestore = FirebaseFirestore.instance;
-  Map<String, TimeOfDay?> openingHours = {};
-  Map<String, TimeOfDay?> closingHours = {};
-
-  try {
-    // Fetch vendor document
-    final doc = await _firestore.collection('vendor').doc(vendorId).get();
-
-    if (doc.exists) {
-      final Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-
-      if (data != null && data.containsKey('working_hours')) {
-        final Map<String, dynamic> workingHours = data['working_hours'];
-
-        for (var day in workingHours.keys) {
-          openingHours[day] = _convertTimestampToTimeOfDay(
-              workingHours[day]['working_hour_from']);
-          closingHours[day] = _convertTimestampToTimeOfDay(
-              workingHours[day]['working_hour_to']);
-        }
-
-        // Display alert dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("ساعات عمل المتجر"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (int i = 0; i < 7; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(color: Colors.black),
-                          children: [
-                            TextSpan(
-                              text: '${_getDayOfWeek(i)}: ',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            TextSpan(
-                              text:
-                                  'من ${_formatTime(openingHours[_getDayOfWeek(i)])} إلى ${_formatTime(closingHours[_getDayOfWeek(i)])}',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  child: Text('موافق'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        // Handle case where 'working_hours' key is missing
-        throw FormatException('Data format error');
-      }
-    } else {
-      // Handle case where document does not exist
-      throw StateError('Document not found');
-    }
-  } catch (e) {
-    // Handle errors (e.g., Firestore errors, data format errors)
-    print('Error fetching data: $e');
-    // Optionally show an error dialog or snackbar here
-  }
-}
-
-String _getDayOfWeek(int index) {
-  switch (index) {
-    case 0:
-      return 'الأحد';
-    case 1:
-      return 'الإثنين';
-    case 2:
-      return 'الثلاثاء';
-    case 3:
-      return 'الإربعاء';
-    case 4:
-      return 'الخميس';
-    case 5:
-      return 'الجمعة';
-    case 6:
-      return 'السبت';
-    default:
-      return '';
-  }
-}
-
-TimeOfDay? _convertTimestampToTimeOfDay(Timestamp? timestamp) {
-  if (timestamp == null) return null;
-  final dateTime = timestamp.toDate();
-  return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
-}
-
-String _formatTime(TimeOfDay? time) {
-  if (time == null) return '';
-  final period = time.period == DayPeriod.am ? 'صباحاً' : 'مساءً';
-  final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-  final minute = time.minute.toString().padLeft(2, '0');
-  return '$minute: $hour $period';
 }

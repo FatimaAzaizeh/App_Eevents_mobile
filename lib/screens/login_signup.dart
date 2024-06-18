@@ -20,20 +20,20 @@ class LoginSignupScreen extends StatefulWidget {
 class _LoginSignupScreenState extends State<LoginSignupScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController NameController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   TextEditingController genderController = TextEditingController();
-  TextEditingController emailSingUpController = TextEditingController();
-  TextEditingController passwordSingUpController = TextEditingController();
-  final Controller = TextEditingController();
+  TextEditingController emailSignUpController = TextEditingController();
+  TextEditingController passwordSignUpController = TextEditingController();
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   bool isSignupScreen = true;
   bool isMale = true;
   bool isAdmin = false;
+
   void _authenticateUser() async {
     try {
       if (isSignupScreen) {
-        if (passwordSingUpController.text.length < 6) {
+        if (passwordSignUpController.text.length < 6) {
           ErrorAlert(
             context,
             "كلمة مرور خاطئة",
@@ -43,8 +43,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
         }
 
         final newUser = await _auth.createUserWithEmailAndPassword(
-          email: emailSingUpController.text.trim(),
-          password: passwordSingUpController.text,
+          email: emailSignUpController.text.trim(),
+          password: passwordSignUpController.text,
         );
 
         if (newUser.user != null) {
@@ -52,8 +52,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
           UserDataBase newUserDatabase = UserDataBase(
             UID: uid,
-            email: emailSingUpController.text,
-            name: NameController.text,
+            email: emailSignUpController.text,
+            name: nameController.text,
             user_type_id:
                 FirebaseFirestore.instance.collection('user_types').doc('2'),
             phone: '',
@@ -66,10 +66,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           if (result == 'User added to the database successfully!') {
             SuccessAlert(context, "تم تسجيل دخولك كمستخدم جديد بنجاح");
           }
-
-          User? user = FirebaseAuth.instance.currentUser;
-          Cart cartItem = Cart(userId: user!.uid, vendors: {});
-          await cartItem.uploadToFirebase();
+          User? currentUser = FirebaseAuth.instance.currentUser;
+          Cart cartItem = Cart(userId: currentUser!.uid, vendors: {});
+          cartItem.uploadToFirebase();
 
           Navigator.push(
             context,
@@ -81,10 +80,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           email: emailController.text.trim(),
           password: passwordController.text,
         );
-
-        User? user1 = FirebaseAuth.instance.currentUser;
-        Cart cartItem2 = Cart(userId: user1!.uid, vendors: {});
-        await cartItem2.uploadToFirebase();
+        User? currentUser = FirebaseAuth.instance.currentUser;
+        Cart cartItem = Cart(userId: currentUser!.uid, vendors: {});
+        cartItem.uploadToFirebase();
 
         Navigator.push(
           context,
@@ -118,10 +116,11 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     }
   }
 
-  //MAIN PAGE
+//main Page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Container(
@@ -233,41 +232,46 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   Container buildSigninSection() {
     return Container(
       margin: EdgeInsets.only(top: 20),
-      child: Column(
-        children: [
-          buildTextField(Icons.mail_outline, "info@dana.com", false, true,
-              emailController),
-          buildTextField(Icons.lock_outline, "**********", true, false,
-              passwordController),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            buildTextField(Icons.mail_outline, "info@dana.com", false, true,
+                emailController),
+            buildTextField(Icons.lock_outline, "**********", true, false,
+                passwordController),
+          ],
+        ),
       ),
     );
   }
 
   Container buildSignupSection() {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
-      margin: EdgeInsets.only(top: 20),
+      margin: EdgeInsets.only(
+          top: 20, left: screenWidth * 0.1, right: screenWidth * 0.1),
       child: Column(
         children: [
           buildTextField(Icons.account_box_outlined, "اسم المستخدم", false,
-              false, NameController),
+              false, nameController),
           buildTextField(Icons.email_outlined, "البريد الالكتروني", false, true,
-              emailSingUpController),
+              emailSignUpController),
           buildTextField(Icons.lock_outline, "كلمة السر", true, false,
-              passwordSingUpController),
+              passwordSignUpController),
           Container(
-            width: 200,
+            width: screenWidth * 0.4, // Adjust the width based on screen size
             margin: EdgeInsets.only(top: 8),
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
                   text: " عند الضغط على الزر فانك موافق ",
-                  style: StyleTextAdmin(10, Palette.textColor2),
+                  style: TextStyle(fontSize: 10, color: Colors.black),
                   children: [
                     TextSpan(
-                      //recognizer: ,
                       text: "على الشروط و الاحكام",
-                      style: StyleTextAdmin(10, Colors.orange),
+                      style: TextStyle(fontSize: 10, color: Colors.orange),
                     ),
                   ]),
             ),
@@ -303,8 +307,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           // Extract user's name
           String? userName = googleSignInAccount.displayName;
 
-          UserDataBase new_user = UserDataBase(
-            UID: user!.uid.toString(),
+          UserDataBase newUser = UserDataBase(
+            UID: user!.uid,
             email: gmailEmail,
             name: userName ?? '', // If displayName is null, use an empty string
             user_type_id:
@@ -314,11 +318,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             isActive: true,
             imageUrl: '',
           );
-          new_user.saveToDatabase();
-
-          User? currentUser = FirebaseAuth.instance.currentUser;
-          Cart cartItem = Cart(userId: currentUser!.uid, vendors: {});
-          cartItem.uploadToFirebase();
+          await newUser.saveToDatabase();
 
           Navigator.push(
             context,
@@ -352,10 +352,17 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   }
 
   Widget buildBottomHalfContainer(bool showShadow) {
+    // Get screen height using MediaQuery
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    // Calculate top position relative to screen height
+    double topPosition =
+        isSignupScreen ? screenHeight * 0.65 : screenHeight * 0.6;
+
     return AnimatedPositioned(
       duration: Duration(milliseconds: 200),
       curve: Curves.bounceInOut,
-      top: isSignupScreen ? 535 : 430,
+      top: topPosition,
       right: 0,
       left: 0,
       child: Center(
@@ -364,38 +371,41 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           width: 90,
           padding: EdgeInsets.all(15),
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(50),
-              boxShadow: [
-                if (showShadow)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(.3),
-                    spreadRadius: 1.5,
-                    blurRadius: 10,
-                  )
-              ]),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(50),
+            boxShadow: showShadow
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.3),
+                      spreadRadius: 1.5,
+                      blurRadius: 10,
+                    ),
+                  ]
+                : [],
+          ),
           child: !showShadow
               ? GestureDetector(
-                  onTap: () {
-                    _authenticateUser();
-                  },
+                  onTap: _authenticateUser,
                   child: Container(
                     decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [
-                              const Color.fromARGB(255, 241, 199, 135),
-                              Color.fromARGB(255, 243, 134, 132)
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight),
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withOpacity(.3),
-                              spreadRadius: 1,
-                              blurRadius: 2,
-                              offset: Offset(0, 1))
-                        ]),
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 241, 199, 135),
+                          Color.fromARGB(255, 243, 134, 132),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(.3),
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
                     child: Icon(
                       Icons.arrow_back,
                       color: Colors.white,
@@ -409,13 +419,13 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   }
 
   Widget buildTextField(IconData icon, String hintText, bool isPassword,
-      bool isEmail, TextEditingController ControllerTextField) {
+      bool isEmail, TextEditingController controllerTextField) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: TextField(
-        style: StyleTextAdmin(10, Colors.black),
+        style: StyleTextAdmin(14, Colors.black),
         obscureText: isPassword,
-        controller: ControllerTextField,
+        controller: controllerTextField,
         keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
         decoration: InputDecoration(
           prefixIcon: Icon(

@@ -125,25 +125,31 @@ class _EditUserPageState extends State<EditUserPage> {
                                   showSpinner = true;
                                 });
                                 User? currentUser = _auth.currentUser;
-                                if (currentUser != null) {
-                                  String result = await UserDataBase.editUser(
-                                    UID: currentUser.uid,
-                                    phone: _phoneController.text,
-                                    address: _addressController.text,
-                                  );
-                                  if (result ==
-                                      'تم تحديث معلومات المستخدم بنجاح!') {
-                                    SuccessAlert(context, result);
+                                if (_addressController.text.isNotEmpty &&
+                                    _phoneController.text.isNotEmpty) {
+                                  if (currentUser != null) {
+                                    String result = await UserDataBase.editUser(
+                                      UID: currentUser.uid,
+                                      phone: _phoneController.text,
+                                      address: _addressController.text,
+                                    );
+                                    if (result ==
+                                        'تم تحديث معلومات المستخدم بنجاح!') {
+                                      SuccessAlert(context, result);
+                                    } else {
+                                      ErrorAlert(context, 'حدث خطأ', result);
+                                    }
                                   } else {
-                                    ErrorAlert(context, 'حدث خطأ', result);
+                                    ErrorAlert(context, 'حدث خطأ',
+                                        'لم يتم العثور على بيانات المستخدم');
                                   }
+                                  setState(() {
+                                    showSpinner = false;
+                                  });
                                 } else {
-                                  ErrorAlert(context, 'حدث خطأ',
-                                      'لم يتم العثور على بيانات المستخدم');
+                                  ErrorAlert(context, 'خطأ',
+                                      'الرجاء إدخال كل البيانات المطلوبة');
                                 }
-                                setState(() {
-                                  showSpinner = false;
-                                });
                               },
                               child: Text(
                                 'حفظ التغييرات',
