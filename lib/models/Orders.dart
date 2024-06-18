@@ -14,10 +14,9 @@ class Orders {
     required this.totalPrice,
     required this.totalItems,
   });
-
+//"Method to upload New Order to the firebase."
   Future<void> uploadToFirebase() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-
     try {
       // Reference to the collection where you want to add the document
       CollectionReference collectionReference = firestore.collection('orders');

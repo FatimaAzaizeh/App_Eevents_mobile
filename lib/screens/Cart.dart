@@ -24,20 +24,22 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   double totalOrderPrice = 0.0;
   int totalQuantity = 0;
 
-  void updateTotals(Map<String, dynamic> vendors) {
+  void updateTotals(Map<String, dynamic>? vendors) {
     double newTotalOrderPrice = 0.0;
     int newTotalQuantity = 0;
 
-    vendors.values.forEach((items) {
-      items.forEach((_, itemData) {
-        newTotalOrderPrice +=
-            (itemData['price'] ?? 0.0) * (itemData['amount'] ?? 0);
-        newTotalQuantity += (itemData['amount'] ?? 0) as int;
+    if (vendors != null && vendors.isNotEmpty) {
+      vendors.values.forEach((items) {
+        items.forEach((_, itemData) {
+          newTotalOrderPrice +=
+              (itemData['price'] ?? 0.0) * (itemData['amount'] ?? 0);
+          newTotalQuantity += (itemData['amount'] ?? 0) as int;
+        });
       });
-    });
+    }
 
-    if (totalOrderPrice != newTotalOrderPrice ||
-        totalQuantity != newTotalQuantity) {
+    if (newTotalOrderPrice != totalOrderPrice ||
+        newTotalQuantity != totalQuantity) {
       setState(() {
         totalOrderPrice = newTotalOrderPrice;
         totalQuantity = newTotalQuantity;
@@ -65,16 +67,18 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                     return Center(child: Text('User not logged in'));
                   }
                   final userId = snapshot.data!.uid;
-                  return StreamBuilder<DocumentSnapshot>(
-                    stream: FirebaseFirestore.instance
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
                         .collection("cart")
                         .doc(userId)
-                        .snapshots(),
+                        .get(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       }
                       if (!snapshot.hasData || !snapshot.data!.exists) {
+                        updateTotals(
+                            null); // إعادة تعيين الإجماليات إذا لم توجد بيانات
                         return Center(
                           child: Text(
                             'لا توجد عناصر في السلة',
@@ -88,7 +92,9 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
                       final Map<String, dynamic>? cartData =
                           snapshot.data!.data() as Map<String, dynamic>?;
-                      if (cartData == null) {
+                      if (cartData == null || cartData.isEmpty) {
+                        updateTotals(
+                            null); // إعادة تعيين الإجماليات إذا كانت السلة فارغة
                         return Center(
                           child: Text(
                             'لا توجد عناصر في السلة',
@@ -101,37 +107,31 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       }
 
                       final Map<String, dynamic>? vendors = cartData['vendors'];
-                      if (vendors == null || vendors.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'لا توجد عناصر في السلة',
-                            style: StyleTextAdmin(
-                              screenSize.width * 0.04,
-                              Colors.black,
-                            ),
-                          ),
-                        );
-                      }
-
-                      // Update totals when data changes
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         updateTotals(vendors);
                       });
 
                       return ListView.builder(
                         shrinkWrap: true,
-                        itemCount: vendors.length,
+                        itemCount: vendors!.length,
                         itemBuilder: (context, index) {
                           final String vendorId = vendors.keys.elementAt(index);
-
                           final items =
                               vendors[vendorId] as Map<String, dynamic>;
-
                           return VendorContainer(
                             vendorId: vendorId,
                             items: items,
                             userId: userId,
-                            onItemChanged: () => updateTotals(vendors),
+                            onItemChanged: () {
+                              FirebaseFirestore.instance
+                                  .collection('cart')
+                                  .doc(userId)
+                                  .get()
+                                  .then((doc) {
+                                final vendors = doc.data()?['vendors'] ?? {};
+                                updateTotals(vendors);
+                              });
+                            },
                           );
                         },
                       );
@@ -181,6 +181,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                             totalOrderPrice = 0;
                             totalQuantity = 0;
                           });
+                          cartItem.clearCart();
                           SuccessAlert(
                             context,
                             'تم ارسال طلبك بنجاح',
@@ -297,7 +298,7 @@ class VendorContainer extends StatelessWidget {
                   Text(
                     'السعر الإجمالي : ${totalPrice.toStringAsFixed(2)} د,إ',
                     style:
-                        StyleTextAdmin(screenSize.width * 0.03, Colors.green),
+                        StyleTextAdmin(screenSize.width * 0.03, Colors.black),
                   ),
                 ],
               ),

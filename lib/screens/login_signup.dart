@@ -284,19 +284,23 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   TextButton buildTextButton(
       IconData icon, String title, Color backgroundColor) {
     return TextButton(
+      // register a new user using Google Sign-In.
       onPressed: () async {
+        // Initialize GoogleSignIn instance
         final GoogleSignIn googleSignIn = GoogleSignIn();
 
         try {
           final GoogleSignInAccount? googleSignInAccount =
               await googleSignIn.signIn();
+          // Retrieve authentication details
           final GoogleSignInAuthentication googleSignInAuthentication =
               await googleSignInAccount!.authentication;
-
+          // Create credentials for Firebase Authentication
           final AuthCredential credential = GoogleAuthProvider.credential(
             accessToken: googleSignInAuthentication.accessToken,
             idToken: googleSignInAuthentication.idToken,
           );
+          // Sign in to Firebase with Google credentials
           final UserCredential userCredential =
               await FirebaseAuth.instance.signInWithCredential(credential);
           final User? user = userCredential.user;

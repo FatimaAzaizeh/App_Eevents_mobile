@@ -129,7 +129,6 @@ class Cart {
     try {
       // Generate order ID from document ID
       String orderId = FirebaseFirestore.instance.collection('orders').doc().id;
-
       // Create an instance of Orders class
       Orders orders = Orders(
         orderId: orderId,
