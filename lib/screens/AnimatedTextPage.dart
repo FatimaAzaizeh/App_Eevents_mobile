@@ -63,12 +63,6 @@ class _AnimatedTextPageState extends State<AnimatedTextPage> {
                 Container(
                   width: 400, // Set width as needed
                   height: 400, // Set height as needed
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/logo.png'), // Replace with your image path
-                      fit: BoxFit.cover,
-                    ),
-                  ),
                 ),
 
                 // Animated Text on Top of the Image
