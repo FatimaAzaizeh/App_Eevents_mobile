@@ -174,40 +174,4 @@ class Cart {
       print('Error moving records to orders: $error');
     }
   }
-
-  Map<String, dynamic> calculateTotalValues() {
-    double totalOrderPrice = 0.0;
-    int totalQuantity = 0;
-
-    if (vendors != null) {
-      vendors!.forEach((vendorId, vendorData) {
-        vendorData.forEach((itemCode, itemData) {
-          double price = itemData['price'] ?? 0.0;
-          int amount = itemData['amount'] ?? 0;
-          totalOrderPrice += price * amount;
-          totalQuantity += amount;
-        });
-      });
-    }
-
-    return {
-      'totalOrderPrice': totalOrderPrice,
-      'totalQuantity': totalQuantity,
-    };
-  }
-
-  // Method to calculate total price asynchronously
-  Future<double> calculateTotalPrice() async {
-    double totalPrice = 0.0;
-    if (vendors != null) {
-      vendors!.forEach((vendorId, vendorData) {
-        vendorData.forEach((itemCode, itemData) {
-          double price = itemData['price'] ?? 0.0;
-          int amount = itemData['amount'] ?? 0;
-          totalPrice += price * amount;
-        });
-      });
-    }
-    return totalPrice;
-  }
 }
