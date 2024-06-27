@@ -5,11 +5,8 @@ import 'package:testtapp/Alert/error.dart';
 import 'package:testtapp/Alert/success.dart';
 import 'package:testtapp/Design/ProductDetails.dart';
 import 'package:testtapp/constants.dart';
-import 'package:testtapp/models/Cart.dart';
 import 'package:testtapp/models/User.dart';
 import 'package:testtapp/screens/EditProfile.dart';
-import 'package:testtapp/screens/Home_screen.dart';
-import 'package:testtapp/screens/VendorItemsPage.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 

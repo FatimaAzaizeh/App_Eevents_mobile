@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:testtapp/Alert/error.dart';
 import 'package:testtapp/Alert/success.dart';
 import 'package:testtapp/constants.dart';
@@ -24,7 +22,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   TextEditingController genderController = TextEditingController();
   TextEditingController emailSignUpController = TextEditingController();
   TextEditingController passwordSignUpController = TextEditingController();
-  final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   bool isSignupScreen = true;
   bool isMale = true;
@@ -76,7 +73,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
           );
         }
       } else {
-        final user = await _auth.signInWithEmailAndPassword(
+        await _auth.signInWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text,
         );

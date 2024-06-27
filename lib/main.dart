@@ -9,7 +9,6 @@ import 'package:testtapp/screens/Cart.dart';
 import 'package:testtapp/screens/Event_screen.dart';
 import 'package:testtapp/screens/Home_screen.dart';
 import 'package:testtapp/screens/OrderHistory.dart';
-import 'package:testtapp/screens/DisplayService.dart';
 import 'package:testtapp/screens/Service_screen.dart';
 import 'package:testtapp/screens/login_signup.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';

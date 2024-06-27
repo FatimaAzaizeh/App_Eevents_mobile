@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:testtapp/screens/DisplayService.dart';
-import 'package:testtapp/widgets/AppBarEevents.dart';
-import 'package:testtapp/widgets/app_drawer.dart';
 
 class WizardSteps extends StatefulWidget {
   final int activeStep;
@@ -38,10 +36,6 @@ class _WizardStepsState extends State<WizardSteps> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double containerSize =
-        screenWidth * 0.8; // Adjust size for better mobile fit
-
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(

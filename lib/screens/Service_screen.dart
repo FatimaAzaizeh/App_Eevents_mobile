@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:testtapp/screens/DisplayService.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';
 import 'package:testtapp/widgets/Service_item.dart';
-import 'package:testtapp/widgets/app_drawer.dart';
 
 class ServiceScreen extends StatefulWidget {
   static const String screenRoute = 'Service_screen';

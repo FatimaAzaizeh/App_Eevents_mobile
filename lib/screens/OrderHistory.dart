@@ -1,12 +1,10 @@
 import 'dart:ui'; // Import dart:ui for MediaQuery
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testtapp/constants.dart';
 import 'package:testtapp/models/Orders.dart';
 import 'package:testtapp/models/User.dart';
-import 'package:testtapp/screens/VendorItemsPage.dart';
 import 'package:testtapp/widgets/AppBarEevents.dart';
 
 class OrderHistoryPage extends StatefulWidget {

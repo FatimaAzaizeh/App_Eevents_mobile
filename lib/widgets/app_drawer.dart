@@ -61,7 +61,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
                   backgroundColor: Colors.white,
-                  radius: 40,
+                  radius: MediaQuery.sizeOf(context).width * 0.08,
                   backgroundImage: AssetImage(_selectedAvatar),
                 ),
               ),

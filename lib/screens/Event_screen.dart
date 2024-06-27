@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:testtapp/widgets/EventItemDisplay.dart';
-import 'package:testtapp/wizard/WizardSteps.dart';
 
 class EventScreen extends StatefulWidget {
   static const String screenRoute = 'Event_screen';
