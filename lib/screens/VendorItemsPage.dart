@@ -76,7 +76,8 @@ class _VendorItemsPageState extends State<VendorItemsPage> {
                 children: [
                   Text(
                     VendorName,
-                    style: StyleTextAdmin(28, Colors.black),
+                    style: StyleTextAdmin(
+                        MediaQuery.sizeOf(context).width * 0.06, Colors.black),
                   ),
                   FloatingActionButton(
                     backgroundColor: ColorPink_100,
